@@ -8,7 +8,7 @@ import mobex.User.User;
 public class Token {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
     private Long id;
 
@@ -17,9 +17,6 @@ public class Token {
 
     @Column(name = "refresh_token")
     private String refreshToken;
-
-    @Column(name = "is_logged_out")
-    private boolean loggedOut;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -41,13 +38,6 @@ public class Token {
         this.accessToken = token;
     }
 
-    public boolean isLoggedOut() {
-        return loggedOut;
-    }
-
-    public void setLoggedOut(boolean loggedOut) {
-        this.loggedOut = loggedOut;
-    }
 
     public User getUser() {
         return user;

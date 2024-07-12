@@ -8,40 +8,37 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
-@Table(name = "user")
+@Table(name = "app_user") // Changed the table name to avoid conflict with reserved keyword
 public class User implements UserDetails {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
     private Long id;
+
     @Column(name = "firstname")
     private String firstname;
+
     @Column(name = "lastname")
     private String lastname;
+
     @Column(name = "email")
     private String email;
+
     @Column(name = "password")
     private String password;
-
-    @Enumerated(value = EnumType.STRING)
-    private Role role;
-
 
     @OneToMany(mappedBy = "user")
     private List<Token> tokens;
 
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role.name()));
+        // For simplicity, just return a single authority indicating basic access
+        return Collections.singleton(new SimpleGrantedAuthority("ACCESS_BASIC"));
     }
     public Long getId() {
         return id;
@@ -66,7 +63,6 @@ public class User implements UserDetails {
     public void setLastName(String lastName) {
         this.lastname = lastName;
     }
-
 
     @Override
     public boolean isAccountNonExpired() {
@@ -99,14 +95,6 @@ public class User implements UserDetails {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
     }
 
     public List<Token> getTokens() {
