@@ -1,23 +1,21 @@
 package mobex.Token;
 
 import jakarta.persistence.*;
-import mobex.AppUser.AppUser;
+import mobex.User.User;
 
-@Table(name = "token")
+@Table(name = "tokens")
 @Entity
 public class Token {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(nullable = false)
-    private Long tokenId;
-
+    public Integer token_id;
     @Column(nullable = false)
-    private String accesToken;
-
+    public String accessToken;
     @Column(nullable = false)
-    private String refreshToken;
+    public String refreshToken;
 
     @ManyToOne
-    @JoinColumn(name = "appUser")
-    public AppUser user;
+    @JoinColumn(name = "user_id")
+    public User user;
 }
