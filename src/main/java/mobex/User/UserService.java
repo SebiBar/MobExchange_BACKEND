@@ -1,23 +1,47 @@
 package mobex.User;
 
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
-public class UserService implements UserDetailsService {
+public class UserService {
+    @Autowired
+    private UserRepository userRepository;
 
-    private final UserRepository repository;
-
-    public UserService(UserRepository repository) {
-        this.repository = repository;
+    public Optional<UserDTO> findByEmail(String email){
+        Optional<User> user = userRepository.findByEmail(email);
+        if(user.isPresent()){
+            User foundUser = user.get();
+            UserDTO userDTO = new UserDTO();
+            userDTO.setEmail(foundUser.getEmail());
+            return Optional.of(userDTO);
+        }
+        else{
+            return Optional.empty();
+        }
+    }
+    @Transactional
+    public User registerUser(User userDto){
+        userRepository.save(userDto);
+        return userDto;
     }
 
-    @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        return repository.findByEmail(email)
-                .orElseThrow(()-> new UsernameNotFoundException("User not found"));
+    public UserDTO loginUser(UserDTO userDTO){
+        Optional<User> userOptional = userRepository.findByEmail(userDTO.getEmail());
+        if(userOptional.isPresent()){
+            User user = userOptional.get();
+            if(user.getPassword().equals(userDTO.getPassword())){
+                return userDTO;
+            }
+            else {
+                throw new RuntimeException("Invalid Password");
+            }
+        }
+        else {
+            throw new RuntimeException("User not found");
+        }
     }
 }
-
