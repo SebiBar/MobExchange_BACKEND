@@ -18,6 +18,6 @@ public class Token {
     private String refreshToken;
 
     @ManyToOne
-    @JoinColumn(name = "app_user")
+    @JoinColumn(name = "appUser")
     public AppUser user;
 }
