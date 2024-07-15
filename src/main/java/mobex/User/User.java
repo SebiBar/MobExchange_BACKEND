@@ -26,14 +26,5 @@ public class User {
     @Column(name="password", nullable = false)
     private String password;
 
-
-    public Long getId() {
-        return user_id;
-    }
-
-    public void setId(Long id) {
-        this.user_id = id;
-    }
-
 }
 
