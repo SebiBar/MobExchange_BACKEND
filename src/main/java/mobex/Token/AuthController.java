@@ -1,5 +1,7 @@
-package mobex.User;
+package mobex.Token;
 
+import mobex.User.User;
+import mobex.User.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,42 +11,27 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class UserController {
+public class AuthController {
 
     private final UserService userService;
+    private final AuthService authService;
 
     @Autowired
-    public UserController(UserService userService) {
+    public AuthController(UserService userService, AuthService authService) {
         this.userService = userService;
+        this.authService = authService;
     }
 
-    @GetMapping("/")
-    public String hello(){
-        return "Hello";
-    }
 
-    @PostMapping("/register")
+    @PostMapping("/registerToken")
     public ResponseEntity<?> registerUser(@RequestBody User userData){
         try{
             User newUser = userService.registerUser(userData);
-            return new ResponseEntity<>(newUser, HttpStatus.CREATED);
+            Token token = authService.createToken(newUser);
+            return new ResponseEntity<>(token, HttpStatus.CREATED);
         }
         catch (Exception e){
             return new ResponseEntity<>("Error",HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
-    @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody UserDTO userDTO ){
-        try{
-            UserDTO newUserDTO = userService.loginUser(userDTO);
-            return new ResponseEntity<>(newUserDTO, HttpStatus.OK);
-        }
-        catch (Exception e){
-            return new ResponseEntity<>(null,HttpStatus.UNAUTHORIZED);
-        }
-    }
-
-
 }
-

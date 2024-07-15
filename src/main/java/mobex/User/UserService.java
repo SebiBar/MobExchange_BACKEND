@@ -8,25 +8,18 @@ import java.util.Optional;
 
 @Service
 public class UserService {
-    @Autowired
-    private UserRepository userRepository;
 
-    public Optional<UserDTO> findByEmail(String email){
-        Optional<User> user = userRepository.findByEmail(email);
-        if(user.isPresent()){
-            User foundUser = user.get();
-            UserDTO userDTO = new UserDTO();
-            userDTO.setEmail(foundUser.getEmail());
-            return Optional.of(userDTO);
-        }
-        else{
-            return Optional.empty();
-        }
+    private final UserRepository userRepository;
+
+    @Autowired
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
+
     @Transactional
-    public User registerUser(User userDto){
-        userRepository.save(userDto);
-        return userDto;
+    public User registerUser(User user){
+        userRepository.save(user);
+        return user;
     }
 
     public UserDTO loginUser(UserDTO userDTO){
