@@ -1,29 +1,32 @@
-package mobex.AppUser;
+package mobex.User;
+
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-public class AppUserController {
+public class UserController {
 
-    @Autowired
-    private AppUserServiceImpl appUserServiceImpl;
+    private final UserService userService;
 
-    private static final Logger logger = LoggerFactory.getLogger(AppUserController.class);
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
+
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
     @GetMapping("/")
     public String hello(){
         return "Hello World";
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody AppUser appUser){
+    public ResponseEntity<?> register(@RequestBody User userData){
 
         try {
-            AppUser newUser = appUserServiceImpl.register(appUser);
+            User newUser = userService.registerUser(userData);
             return new ResponseEntity<>(newUser, HttpStatus.CREATED);
         } catch (EmailNotValidException e) {
             logger.error("Error registering user", e);

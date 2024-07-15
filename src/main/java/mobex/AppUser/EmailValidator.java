@@ -1,4 +1,4 @@
-package mobex.AppUser;
+package mobex.User;
 
 import org.springframework.stereotype.Component;
 

@@ -1,4 +1,4 @@
-package mobex.AppUser;
+package mobex.User;
 
 public class EmailNotValidException extends RuntimeException {
     public EmailNotValidException(String message) {
