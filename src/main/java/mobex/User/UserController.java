@@ -28,11 +28,23 @@ public class UserController {
         try {
             User newUser = userService.registerUser(userData);
             return new ResponseEntity<>(newUser, HttpStatus.CREATED);
-        } catch (EmailNotValidException e) {
+        } catch (Exception e) {
             logger.error("Error registering user", e);
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> loginUser(@RequestBody UserDTO userDTO ){
+        try{
+            UserDTO newUserDTO = userService.loginUser(userDTO);
+            return new ResponseEntity<>(newUserDTO, HttpStatus.OK);
+        }
+        catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.UNAUTHORIZED);
+        }
+    }
+
 
 
     @ExceptionHandler(Exception.class)

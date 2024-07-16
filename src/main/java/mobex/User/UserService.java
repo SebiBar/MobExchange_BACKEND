@@ -20,17 +20,6 @@ public class UserService {
         this.emailValidator = emailValidator;
     }
 
-    public Optional<UserDTO> findByEmail(String email) {
-        Optional<User> user = userRepository.findByEmail(email);
-        if (user.isPresent()) {
-            User foundUser = user.get();
-            UserDTO userDTO = new UserDTO();
-            userDTO.setEmail(foundUser.getEmail());
-            return Optional.of(userDTO);
-        } else {
-            return Optional.empty();
-        }
-    }
     @Transactional
     public User registerUser (User userDTO) {
         try {
@@ -41,7 +30,6 @@ public class UserService {
         } catch (Exception e) {
             throw new RuntimeException("Error saving user: " + e.getMessage());
         }
-
     }
 
     public UserDTO loginUser(UserDTO userDTO){
