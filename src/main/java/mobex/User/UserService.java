@@ -21,12 +21,12 @@ public class UserService {
     }
 
     @Transactional
-    public User registerUser (User userDTO) {
+    public User registerUser (User user) {
         try {
-            String userEmail = userDTO.getEmail();
+            String userEmail = user.getEmail();
             if(!emailValidator.isValidEmail(userEmail))
                 throw new EmailNotValidException("Email is not valid: " + userEmail);
-            return userRepository.save(userDTO);
+            return userRepository.save(user);
         } catch (Exception e) {
             throw new RuntimeException("Error saving user: " + e.getMessage());
         }
