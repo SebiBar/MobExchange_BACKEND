@@ -23,15 +23,23 @@ public class AuthService {
     public Token createToken(User user) {
 
         Token token = new Token(
-                UUID.randomUUID().toString(),       //accessToken
+                generateTokenValue(),               //accessToken
                 LocalDateTime.now().plusHours(1),   //accessTokenExpires
-                UUID.randomUUID().toString(),       //refreshToken
+                generateTokenValue(),               //refreshToken
                 LocalDateTime.now().plusHours(12),  //refreshTokenExpires
                 user);                              //user
 
         tokenRepository.save(token);
 
         return token;
+    }
+
+    public TokenDTO createTokenReturnDTO(User user) {
+        Token token = this.createToken(user);
+        return new TokenDTO(
+                token.getAccessToken(),
+                token.getRefreshToken()
+        );
     }
 
     private String generateTokenValue() {
