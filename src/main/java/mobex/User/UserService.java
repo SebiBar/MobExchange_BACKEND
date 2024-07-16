@@ -1,7 +1,6 @@
 package mobex.User;
 
 import jakarta.transaction.Transactional;
-import mobex.Token.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,19 +9,17 @@ import java.util.Optional;
 @Service
 public class UserService {
 
-    private UserRepository userRepository;
-    private TokenService tokenService;
+    private final UserRepository userRepository;
+
     @Autowired
-    public UserService(UserRepository userRepository, TokenService tokenService) {
+    public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.tokenService = tokenService;
     }
 
     @Transactional
     public User registerUser(User user){
-        User newUser = userRepository.save(user);
-        tokenService.createToken(user);
-        return newUser;
+        userRepository.save(user);
+        return user;
     }
 
     public UserDTO loginUser(UserDTO userDTO){

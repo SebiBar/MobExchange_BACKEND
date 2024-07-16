@@ -1,54 +1,47 @@
 package mobex.Token;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import mobex.User.User;
 
-import java.util.Calendar;
-import java.util.Date;
+import java.time.LocalDateTime;
+
+
 
 @Table(name = "tokens")
-@Getter
-@Setter
-@NoArgsConstructor
 @Entity
+@Setter
+@Getter
+@NoArgsConstructor
 public class Token {
+
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(nullable = false)
     private Long token_id;
+
     @Column(nullable = false)
     private String accessToken;
+
+    @Column(nullable = false)
+    private LocalDateTime accessTokenExpires;
+
     @Column(nullable = false)
     private String refreshToken;
+
     @Column(nullable = false)
-    private Date expirationDate;
+    private LocalDateTime refreshTokenExpires;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    public Token(User user){
-        setUser(user);
-        setAccessToken(generateAccessToken());
-        setRefreshToken(generateRefreshToken());
-        setExpirationDate(calculateExpirationDate(60));
-    }
-
-    private String generateAccessToken() {
-        // Implement access token generation logic
-        return "access";
-    }
-
-    private String generateRefreshToken() {
-        // Implement refresh token generation logic
-        return "refresh";
-    }
-    private Date calculateExpirationDate(int expirationTimeInMinutes) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.MINUTE, expirationTimeInMinutes);
-        return calendar.getTime();
+    public Token(String s, LocalDateTime localDateTime, String s1, LocalDateTime localDateTime1, User user) {
+        this.accessToken = s;
+        this.accessTokenExpires = localDateTime;   //scris foarte prost
+        this.refreshToken = s1;
+        this.refreshTokenExpires = localDateTime1;
+        this.user = user;
     }
 }

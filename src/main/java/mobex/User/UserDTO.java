@@ -3,8 +3,8 @@ package mobex.User;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
 @Setter
+@Getter
 public class UserDTO {
     private String email;
     private String password;
