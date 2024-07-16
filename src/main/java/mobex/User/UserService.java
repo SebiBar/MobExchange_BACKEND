@@ -1,6 +1,7 @@
 package mobex.User;
 
 import jakarta.transaction.Transactional;
+import mobex.Token.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -8,25 +9,20 @@ import java.util.Optional;
 
 @Service
 public class UserService {
-    @Autowired
-    private UserRepository userRepository;
 
-    public Optional<UserDTO> findByEmail(String email){
-        Optional<User> user = userRepository.findByEmail(email);
-        if(user.isPresent()){
-            User foundUser = user.get();
-            UserDTO userDTO = new UserDTO();
-            userDTO.setEmail(foundUser.getEmail());
-            return Optional.of(userDTO);
-        }
-        else{
-            return Optional.empty();
-        }
+    private UserRepository userRepository;
+    private TokenService tokenService;
+    @Autowired
+    public UserService(UserRepository userRepository, TokenService tokenService) {
+        this.userRepository = userRepository;
+        this.tokenService = tokenService;
     }
+
     @Transactional
-    public User registerUser(User userDto){
-        userRepository.save(userDto);
-        return userDto;
+    public User registerUser(User user){
+        User newUser = userRepository.save(user);
+        tokenService.createToken(user);
+        return newUser;
     }
 
     public UserDTO loginUser(UserDTO userDTO){
