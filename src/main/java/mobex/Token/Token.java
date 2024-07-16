@@ -44,4 +44,8 @@ public class Token {
         this.refreshTokenExpires = localDateTime1;
         this.user = user;
     }
+
+    public Boolean isValid() {  //if after today -> not expired
+        return getAccessTokenExpires().isAfter(LocalDateTime.now());
+    }
 }

@@ -1,17 +1,16 @@
 package mobex.Token;
 
-import mobex.User.User;
-import mobex.User.UserDTO;
-import mobex.User.UserRepository;
-import mobex.User.UserService;
+import mobex.User.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @RestController
+@RequestMapping("/auth")
 public class AuthController {
 
     private final UserService userService;
@@ -65,13 +64,42 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@RequestHeader("Authorization") String accessToken){
         try{
-             accessToken = accessToken.substring(7);
+            accessToken = accessToken.substring(7);
             Optional<Token> tokenOptional = tokenRepository.findTokenByAccessToken(accessToken);
             tokenOptional.ifPresent(tokenRepository::delete);
             return new ResponseEntity<>("Token deleted",HttpStatus.OK);
         }
         catch(Exception e){
-            return new ResponseEntity<>("scsdcsd",HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>("Possible invalid token",HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+    @PostMapping("/getNewRefreshToken")
+    public ResponseEntity<?> getNewRefreshToken(@RequestHeader("Authorization") String accessToken){
+        try{
+            accessToken = accessToken.substring(7);
+            TokenDTO tokenDTO  = authService.replaceOldToken(accessToken);
+            if (tokenDTO != null)
+                return new ResponseEntity<>(tokenDTO,HttpStatus.CREATED);
+            return new ResponseEntity<>("Null Token",HttpStatus.UNAUTHORIZED);
+        }
+        catch (Exception e){
+            return new ResponseEntity<>("Invalid token",HttpStatus.UNAUTHORIZED);
+        }
+
+    }
+
+    @GetMapping("/getUserDetails")
+    public ResponseEntity<?> getUserDetails(@RequestHeader("Authorization") String accessToken){
+        try{
+            accessToken = accessToken.substring(7);
+            UserDetailsDTO userDetailsDTO = authService.getUserDetails(accessToken);
+            if (userDetailsDTO != null)
+                return new ResponseEntity<>(userDetailsDTO,HttpStatus.OK);
+            return new ResponseEntity<>("Null Token",HttpStatus.UNAUTHORIZED);
+        }
+        catch (Exception e){
+            return new ResponseEntity<>("o puscat",HttpStatus.UNAUTHORIZED);
         }
     }
 }

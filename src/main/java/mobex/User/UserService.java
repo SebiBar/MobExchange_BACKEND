@@ -22,19 +22,4 @@ public class UserService {
         return user;
     }
 
-    public UserDTO loginUser(UserDTO userDTO){
-        Optional<User> userOptional = userRepository.findByEmail(userDTO.getEmail());
-        if(userOptional.isPresent()){
-            User user = userOptional.get();
-            if(user.getPassword().equals(userDTO.getPassword())){
-                return userDTO;
-            }
-            else {
-                throw new RuntimeException("Invalid Password");
-            }
-        }
-        else {
-            throw new RuntimeException("User not found");
-        }
-    }
 }
