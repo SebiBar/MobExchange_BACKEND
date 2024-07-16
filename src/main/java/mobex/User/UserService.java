@@ -12,23 +12,29 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final EmailValidator emailValidator;
 
     @Autowired
-    public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder, EmailValidator emailValidator) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.emailValidator = emailValidator;
     }
 
     @Transactional
     public User registerUser(User user){
         try{
+            String userEmail = user.getEmail();
+            if(!emailValidator.isValidEmail(userEmail)) {
+                throw new EmailNotValidException("Email not valid: " + userEmail);
+            }
             String hashedPassword = passwordEncoder.encode(user.getPassword());
             user.setPassword(hashedPassword);
             userRepository.save(user);
             return user;
         }
         catch(Error e){
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException("Error saving user: " + e.getMessage());
         }
     }
 

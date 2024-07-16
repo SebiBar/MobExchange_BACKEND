@@ -35,7 +35,7 @@ public class AuthController {
             return new ResponseEntity<>(tokenDTO, HttpStatus.CREATED);
         }
         catch (Exception e){
-            return new ResponseEntity<>("Email is already in use", HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
         }
     }
 
