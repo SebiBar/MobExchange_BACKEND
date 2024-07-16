@@ -26,7 +26,7 @@ public class UserService {
         try{
             String userEmail = user.getEmail();
             if(!emailValidator.isValidEmail(userEmail)) {
-                throw new EmailNotValidException("Email not valid: " + userEmail);
+                throw new RuntimeException(("Email is not valid " + userEmail));
             }
             String hashedPassword = passwordEncoder.encode(user.getPassword());
             user.setPassword(hashedPassword);
@@ -38,6 +38,7 @@ public class UserService {
         }
     }
 
+    @Transactional
     public User loginUser(UserDTO userDTO){
         Optional<User> userOptional = userRepository.findByEmail(userDTO.getEmail());
         if(userOptional.isPresent()){

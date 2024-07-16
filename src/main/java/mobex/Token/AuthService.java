@@ -1,5 +1,6 @@
 package mobex.Token;
 
+import jakarta.transaction.Transactional;
 import mobex.User.User;
 import mobex.User.UserDetailsDTO;
 import mobex.User.UserService;
@@ -7,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -38,10 +40,6 @@ public class AuthService {
         return token;
     }
 
-    public void logoutUser(User user) {
-
-    }
-
     public TokenDTO createTokenReturnDTO(User user) {
         Token token = this.createToken(user);
         return new TokenDTO(
@@ -50,8 +48,8 @@ public class AuthService {
         );
     }
 
-    public TokenDTO replaceOldToken(String accessToken) {
-        Optional<Token> tokenOptional = tokenRepository.findTokenByAccessToken(accessToken);
+    public TokenDTO replaceOldToken(String refreshToken) {
+        Optional<Token> tokenOptional = tokenRepository.findTokenByRefreshToken(refreshToken);
         if (tokenOptional.isPresent()) {
             Token token = tokenOptional.get();
             User user = token.getUser();
@@ -73,12 +71,37 @@ public class AuthService {
                         user.getEmail()
                 );
             }
-            //return new ResponseEntity<>("Token expired",HttpStatus.UNAUTHORIZED);
+            else
+                throw new RuntimeException("Access token expired");
         }
-       return null;
+       throw new RuntimeException("User not found");
+    }
+
+/*    public User getUserByAccessToken(String accessToken) {
+        Optional<Token> tokenOptional = tokenRepository.findTokenByAccessToken(accessToken);
+        if (tokenOptional.isPresent()) {
+            Token token = tokenOptional.get();
+            return token.getUser();
+        }
+        throw new RuntimeException("Invalid access token");
+    }*/
+
+    @Transactional
+    public void deleteToken(String accessToken) {
+        Optional<Token> tokenOptional = tokenRepository.findTokenByAccessToken(accessToken);
+
+        if (tokenOptional.isPresent()) {
+            tokenRepository.delete(tokenOptional.get());
+        }
+        else{
+            throw new RuntimeException("Token not found");
+        }
+
     }
 
     private String generateTokenValue() {
         return UUID.randomUUID().toString();
     }
+
+
 }

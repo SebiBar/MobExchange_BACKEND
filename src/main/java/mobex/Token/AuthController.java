@@ -1,9 +1,6 @@
 package mobex.Token;
 
-import mobex.User.User;
-import mobex.User.UserDTO;
-import mobex.User.UserRepository;
-import mobex.User.UserService;
+import mobex.User.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,13 +15,11 @@ public class AuthController {
 
     private final UserService userService;
     private final AuthService authService;
-    private final TokenRepository tokenRepository;
 
     @Autowired
-    public AuthController(UserService userService, AuthService authService, TokenRepository tokenRepository) {
+    public AuthController(UserService userService, AuthService authService) {
         this.userService = userService;
         this.authService = authService;
-        this.tokenRepository = tokenRepository;
     }
 
     @PostMapping("/register")
@@ -47,7 +42,7 @@ public class AuthController {
             return new ResponseEntity<>(tokenDTO, HttpStatus.CREATED);
         }
         catch (Exception e){
-            return new ResponseEntity<>("Invalid credentials", HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
         }
     }
 
@@ -55,12 +50,39 @@ public class AuthController {
     public ResponseEntity<?> logout(@RequestHeader("Authorization") String accessToken){
         try{
             accessToken = accessToken.substring(7); // Remove "Bearer " prefix
-            Optional<Token> tokenOptional = tokenRepository.findTokenByAccessToken(accessToken);
-            tokenOptional.ifPresent(tokenRepository::delete);
+
+            authService.deleteToken(accessToken);
+
             return new ResponseEntity<>("Token deleted", HttpStatus.OK);
         }
         catch(Exception e){
-            return new ResponseEntity<>("Invalid token", HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
         }
     }
+
+    @GetMapping("/getUserDetails")
+    public ResponseEntity<?> getUserDetails(@RequestHeader("Authorization") String accessToken){
+        try{
+            accessToken = accessToken.substring(7);
+            UserDetailsDTO userDetailsDTO = authService.getUserDetails(accessToken);
+            return new ResponseEntity<>(userDetailsDTO, HttpStatus.OK);
+        }
+        catch(Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+    @PostMapping("/getNewRefreshToken")
+    public ResponseEntity<?> getNewRefreshToken(@RequestHeader("Authorization") String refreshToken){
+        try{
+            refreshToken = refreshToken.substring(7);  // da cut la refreshToken la fel ca la access
+            TokenDTO tokenDTO = authService.replaceOldToken(refreshToken);
+            return new ResponseEntity<>(tokenDTO, HttpStatus.CREATED);
+        }
+        catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+
 }
