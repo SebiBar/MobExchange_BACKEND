@@ -27,16 +27,13 @@ public class AuthService {
     }
 
     public Token createToken(User user) {
-
         Token token = new Token(
                 generateTokenValue(),               //accessToken
                 LocalDateTime.now().plusHours(1),   //accessTokenExpires
                 generateTokenValue(),               //refreshToken
                 LocalDateTime.now().plusHours(12),  //refreshTokenExpires
                 user);                              //user
-
         tokenRepository.save(token);
-
         return token;
     }
 
@@ -48,33 +45,25 @@ public class AuthService {
         );
     }
 
+    @Transactional
     public TokenDTO replaceOldToken(String refreshToken) {
-        Optional<Token> tokenOptional = tokenRepository.findTokenByRefreshToken(refreshToken);
-        if (tokenOptional.isPresent()) {
-            Token token = tokenOptional.get();
-            User user = token.getUser();
-            tokenRepository.delete(token);
-            return this.createTokenReturnDTO(user);
-        }
-        return null;
+        Token token = getTokenByRefreshToken(refreshToken);
+        User user = token.getUser();
+        tokenRepository.delete(token);  //deletes old token
+        return this.createTokenReturnDTO(user); // returns new token in DTO form
     }
 
     public UserDetailsDTO getUserDetails(String accessToken) {
-        Optional<Token> tokenOptional = tokenRepository.findTokenByAccessToken(accessToken);
-        if (tokenOptional.isPresent()) {
-            Token token = tokenOptional.get();
-            if (token.isValid()){    //if after today -> not expired
-                User user = token.getUser();
-                return new UserDetailsDTO(
-                        user.getFirstname(),
-                        user.getLastname(),
-                        user.getEmail()
-                );
-            }
-            else
-                throw new RuntimeException("Access token expired");
-        }
-       throw new RuntimeException("User not found");
+        Token token = getTokenByAccessToken(accessToken);
+        if (token.isValid()) {    //if after today -> not expired
+            User user = token.getUser();
+            return new UserDetailsDTO(
+                    user.getFirstname(),
+                    user.getLastname(),
+                    user.getEmail()
+            );
+        } else
+            throw new RuntimeException("Access token expired");
     }
 
 /*    public User getUserByAccessToken(String accessToken) {
@@ -88,15 +77,26 @@ public class AuthService {
 
     @Transactional
     public void deleteToken(String accessToken) {
+        Token token = getTokenByAccessToken(accessToken);
+        tokenRepository.delete(token);
+    }
+
+    public Token getTokenByAccessToken(String accessToken) {
+        accessToken = accessToken.replace("Bearer ", "");
         Optional<Token> tokenOptional = tokenRepository.findTokenByAccessToken(accessToken);
-
         if (tokenOptional.isPresent()) {
-            tokenRepository.delete(tokenOptional.get());
+            return tokenOptional.get();
         }
-        else{
-            throw new RuntimeException("Token not found");
-        }
+        throw new RuntimeException("Token not found");
+    }
 
+    public Token getTokenByRefreshToken(String refreshToken) {
+        refreshToken = refreshToken.replace("Bearer ", "");
+        Optional<Token> tokenOptional = tokenRepository.findTokenByRefreshToken(refreshToken);
+        if (tokenOptional.isPresent()) {
+            return tokenOptional.get();
+        }
+        throw new RuntimeException("Token not found");
     }
 
     private String generateTokenValue() {

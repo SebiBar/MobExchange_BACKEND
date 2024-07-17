@@ -15,11 +15,13 @@ public class AuthController {
 
     private final UserService userService;
     private final AuthService authService;
+    private final TokenRepository tokenRepository;
 
     @Autowired
-    public AuthController(UserService userService, AuthService authService) {
+    public AuthController(UserService userService, AuthService authService, TokenRepository tokenRepository) {
         this.userService = userService;
         this.authService = authService;
+        this.tokenRepository = tokenRepository;
     }
 
     @PostMapping("/register")
@@ -63,7 +65,6 @@ public class AuthController {
     @GetMapping("/getUserDetails")
     public ResponseEntity<?> getUserDetails(@RequestHeader("Authorization") String accessToken){
         try{
-            accessToken = accessToken.substring(7);
             UserDetailsDTO userDetailsDTO = authService.getUserDetails(accessToken);
             return new ResponseEntity<>(userDetailsDTO, HttpStatus.OK);
         }
@@ -75,9 +76,37 @@ public class AuthController {
     @PostMapping("/getNewRefreshToken")
     public ResponseEntity<?> getNewRefreshToken(@RequestHeader("Authorization") String refreshToken){
         try{
-            refreshToken = refreshToken.substring(7);  // da cut la refreshToken la fel ca la access
+
             TokenDTO tokenDTO = authService.replaceOldToken(refreshToken);
             return new ResponseEntity<>(tokenDTO, HttpStatus.CREATED);
+        }
+        catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+    @GetMapping("/verifyAccessToken")
+    public ResponseEntity<?> verifyAccessToken(@RequestHeader("Authorization") String accessToken){
+        try{
+            Token token = authService.getTokenByAccessToken(accessToken);
+            if (token.isValid())
+                return new ResponseEntity<>("Valid token", HttpStatus.OK);
+            else
+                return new ResponseEntity<>("Expired token", HttpStatus.UNAUTHORIZED);
+        }
+        catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+    @GetMapping("/verifyRefreshToken")
+    public ResponseEntity<?> verifyRefreshToken(@RequestHeader("Authorization") String refreshToken){
+        try{
+            Token token = authService.getTokenByRefreshToken(refreshToken);
+            if (token.isValidRefreshToken())
+                return new ResponseEntity<>("Valid token", HttpStatus.OK);
+            else
+                return new ResponseEntity<>("Expired token", HttpStatus.UNAUTHORIZED);
         }
         catch (Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);

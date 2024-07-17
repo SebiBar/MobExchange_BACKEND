@@ -1,6 +1,7 @@
 package mobex.User;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,7 +12,6 @@ import lombok.Setter;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name="user_id", nullable = false)
     private Long user_id;
 
     @Column(name="firstname", nullable = false)

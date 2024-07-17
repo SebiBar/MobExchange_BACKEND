@@ -48,4 +48,8 @@ public class Token {
     public Boolean isValid() {  //if after today -> not expired
         return getAccessTokenExpires().isAfter(LocalDateTime.now());
     }
+
+    public Boolean isValidRefreshToken(){
+        return getRefreshTokenExpires().isAfter(LocalDateTime.now());
+    }
 }
