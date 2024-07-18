@@ -23,21 +23,22 @@ public class UserService {
 
     @Transactional
     public User registerUser(User user){
-        try{
-            String userEmail = user.getEmail();
-            if(!emailValidator.isValidEmail(userEmail)) {
-                throw new EmailNotValidException("Email not valid: " + userEmail);
-            }
-            String hashedPassword = passwordEncoder.encode(user.getPassword());
-            user.setPassword(hashedPassword);
-            userRepository.save(user);
-            return user;
+        String userEmail = user.getEmail();
+        if(!emailValidator.isValidEmail(userEmail)) {
+            throw new RuntimeException(("Email is not valid " + userEmail));
         }
-        catch(Error e){
-            throw new RuntimeException("Error saving user: " + e.getMessage());
+        String hashedPassword = passwordEncoder.encode(user.getPassword());
+        user.setPassword(hashedPassword);
+
+        if (userRepository.findByEmail(userEmail).isPresent()) {
+            throw new RuntimeException(("Email already used " + userEmail));
         }
+
+        userRepository.save(user);
+        return user;
     }
 
+    @Transactional
     public User loginUser(UserDTO userDTO){
         Optional<User> userOptional = userRepository.findByEmail(userDTO.getEmail());
         if(userOptional.isPresent()){
