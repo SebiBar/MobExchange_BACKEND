@@ -1,10 +1,12 @@
 package mobex.Token;
 
+import jakarta.validation.Valid;
 import mobex.User.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
@@ -15,13 +17,11 @@ public class AuthController {
 
     private final UserService userService;
     private final AuthService authService;
-    private final TokenRepository tokenRepository;
 
     @Autowired
-    public AuthController(UserService userService, AuthService authService, TokenRepository tokenRepository) {
+    public AuthController(UserService userService, AuthService authService) {
         this.userService = userService;
         this.authService = authService;
-        this.tokenRepository = tokenRepository;
     }
 
     @PostMapping("/register")
