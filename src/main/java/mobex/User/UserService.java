@@ -13,19 +13,40 @@ public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final EmailValidator emailValidator;
+    private final NameValidator nameValidator;
+    private final PasswordValidator passwordValidator;
 
     @Autowired
-    public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder, EmailValidator emailValidator) {
+    public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder,
+                       EmailValidator emailValidator, NameValidator nameValidator,
+                       PasswordValidator passwordValidator) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailValidator = emailValidator;
+        this.nameValidator = nameValidator;
+        this.passwordValidator = passwordValidator;
     }
 
     @Transactional
     public User registerUser(User user){
         String userEmail = user.getEmail();
+        String userFirstName = user.getFirstname();
+        String userLastName = user.getLastname();
+        String userPassword = user.getPassword();
+        if(!nameValidator.isValidName(userFirstName) ){
+            throw new RuntimeException("First name is not valid " + userFirstName);
+        }
+        if(!nameValidator.isValidName(userLastName) ){
+            throw new RuntimeException("Last name is not valid " + userLastName);
+        }
         if(!emailValidator.isValidEmail(userEmail)) {
             throw new RuntimeException(("Email is not valid " + userEmail));
+        }
+        if(userPassword == null || userPassword.length() < 6 || userPassword.length() > 20) {
+            throw new RuntimeException("Password must be between 6 and 20 characters");
+        }
+        if(!passwordValidator.isValidPassword(userPassword)){
+            throw new RuntimeException(("Password is not valid"));
         }
         String hashedPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(hashedPassword);

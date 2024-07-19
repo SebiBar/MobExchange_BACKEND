@@ -66,7 +66,6 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@RequestHeader("Authorization") String accessToken){
         try {
-            accessToken = accessToken.substring(7); // Remove "Bearer " prefix
             authService.deleteToken(accessToken);
             return new ResponseEntity<>("Token deleted", HttpStatus.OK);
         } catch(Exception e) {
