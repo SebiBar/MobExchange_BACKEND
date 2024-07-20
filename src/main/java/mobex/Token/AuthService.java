@@ -66,14 +66,10 @@ public class AuthService {
             throw new RuntimeException("Access token expired");
     }
 
-/*    public User getUserByAccessToken(String accessToken) {
-        Optional<Token> tokenOptional = tokenRepository.findTokenByAccessToken(accessToken);
-        if (tokenOptional.isPresent()) {
-            Token token = tokenOptional.get();
-            return token.getUser();
-        }
-        throw new RuntimeException("Invalid access token");
-    }*/
+    public User getUserByAccessToken(String accessToken) {
+        Token token = getTokenByAccessToken(accessToken);
+        return token.getUser();
+    }
 
     @Transactional
     public void deleteToken(String accessToken) {
