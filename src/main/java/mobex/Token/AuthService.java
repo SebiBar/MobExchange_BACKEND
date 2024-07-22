@@ -10,8 +10,6 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
-// TODO: CHANGE METHOD TYPE TO TOKEN INSTEAD OF STRING
-
 @Service
 public class AuthService {
 

@@ -11,10 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-
-// TODO: FIX TOKEN VALIDATION ON TOKEN-BASED REQUESTS
-// fix AuthService first
-
 @RestController
 @RequestMapping("/auth")
 @Tag(name = "Authentication", description = "Endpoints for managing user authentication and authorization.")
