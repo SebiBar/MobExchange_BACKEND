@@ -1,5 +1,4 @@
 package mobex.Token;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -143,4 +142,22 @@ public class AuthController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
         }
     }
+
+    @Operation(summary = "Change user password", description = "Allows a user to change their password.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Password changed successfully."),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - Invalid old password or user not found.")
+    })
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordDTO changePasswordDTO) {
+        try {
+            authService.changePassword(changePasswordDTO.getEmail(), changePasswordDTO.getOldPassword(), changePasswordDTO.getNewPassword());
+            return new ResponseEntity<>("Password changed successfully.", HttpStatus.OK);
+        } catch(Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+    //TODO: implement forgot-password endpoint with no token authorization and
+    // change change-password endpoint to require token authorization
 }
