@@ -167,4 +167,33 @@ public class AuthController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
         }
     }
+    @Operation(summary = "Forgot password", description = "Sends an email to the user with a link to reset the password")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Email sent successfully"),
+            @ApiResponse(responseCode = "401", description = "Email does not exist in the database")
+    })
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody EmailDTO emailDTO){
+        try{
+            userService.forgotPassword(emailDTO.getEmail());
+            return new ResponseEntity<>("Sent email successfully", HttpStatus.OK);
+        } catch(Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+    @Operation(summary = "Set password", description = "The user sets a new password from the email forgot password link")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Password set successfully"),
+            @ApiResponse(responseCode = "401", description = "Invalid or same password")
+    })
+    @PostMapping("/set-password/")
+    public ResponseEntity<?> setPassword(@RequestBody SetPasswordDTO setPasswordDTO, @RequestParam String token){
+        try{
+            userService.setPassword(setPasswordDTO.getNewPassword(), token);
+            return new ResponseEntity<>("New password set successfully",HttpStatus.OK);
+        } catch(Exception e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.UNAUTHORIZED);
+        }
+    }
 }
