@@ -11,7 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-
 @RestController
 @RequestMapping("/auth")
 @Tag(name = "Authentication", description = "Endpoints for managing user authentication and authorization.")
@@ -67,35 +66,12 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@RequestHeader("Authorization") String accessToken){
         try {
-            accessToken = accessToken.substring(7); // Remove "Bearer " prefix
             authService.deleteToken(accessToken);
             return new ResponseEntity<>("Token deleted", HttpStatus.OK);
         } catch(Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
         }
     }
-
-    @PostMapping("/forgot-password")
-    public ResponseEntity<?> forgotPassword(@RequestBody EmailDTO emailDTO){
-        try{
-            userService.forgotPassword(emailDTO.getEmail());
-            return new ResponseEntity<>("Sent email successfully", HttpStatus.OK);
-        } catch(Exception e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
-        }
-    }
-
-    @PostMapping("/set-password/")
-    public ResponseEntity<?> setPassword(@RequestBody SetPasswordDTO setPasswordDTO, @RequestParam String email){
-        try{
-            userService.setPassword(setPasswordDTO.getNewPassword(), email);
-            return new ResponseEntity<>("New password set successfully",HttpStatus.OK);
-        } catch(Exception e){
-            return new ResponseEntity<>(e.getMessage(),HttpStatus.UNAUTHORIZED);
-        }
-    }
-
-
 
     @Operation(summary = "Get user details", description = "Retrieves details of the authenticated user.")
     @Parameter(name = "Authorization", description = "The access token of the authenticated user")
@@ -162,6 +138,31 @@ public class AuthController {
                 return new ResponseEntity<>("Valid token", HttpStatus.OK);
             else
                 return new ResponseEntity<>("Expired token", HttpStatus.UNAUTHORIZED);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+    @Operation(summary = "Change a user's password", description = "Verifies if an access token is valid, changes old password with a new one")
+    @Parameter(name = "Authorization", description = "The access token to be verified")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Password changed successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - invalid or expired access token / old password doesn't match / invalid new password format")
+
+    })
+    @PostMapping("/changePassword")
+    public ResponseEntity<?> changePassword(@RequestHeader("Authorization") String accessToken,
+                                            @RequestBody PasswordDTO passwordDTO){
+        try {
+            Token token = authService.getTokenByAccessToken(accessToken);
+            if(token.isValid()){
+                User user = authService.getUserByAccessToken(accessToken);
+                userService.changePassword(user, passwordDTO);
+                return new ResponseEntity<>("Password changed successfully", HttpStatus.OK);
+            }
+            else{
+                return new ResponseEntity<>("Expired access token", HttpStatus.UNAUTHORIZED);
+            }
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
         }
