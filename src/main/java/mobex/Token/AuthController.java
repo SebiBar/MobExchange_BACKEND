@@ -143,5 +143,57 @@ public class AuthController {
         }
     }
 
+    @Operation(summary = "Change a user's password", description = "Verifies if an access token is valid, changes old password with a new one")
+    @Parameter(name = "Authorization", description = "The access token to be verified")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Password changed successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - invalid or expired access token / old password doesn't match / invalid new password format")
 
+    })
+    @PostMapping("/changePassword")
+    public ResponseEntity<?> changePassword(@RequestHeader("Authorization") String accessToken,
+                                            @RequestBody PasswordDTO passwordDTO){
+        try {
+            Token token = authService.getTokenByAccessToken(accessToken);
+            if(token.isValid()){
+                User user = authService.getUserByAccessToken(accessToken);
+                userService.changePassword(user, passwordDTO);
+                return new ResponseEntity<>("Password changed successfully", HttpStatus.OK);
+            }
+            else{
+                return new ResponseEntity<>("Expired access token", HttpStatus.UNAUTHORIZED);
+            }
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        }
+    }
+    @Operation(summary = "Forgot password", description = "Sends an email to the user with a link to reset the password")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Email sent successfully"),
+            @ApiResponse(responseCode = "401", description = "Email does not exist in the database")
+    })
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody EmailDTO emailDTO){
+        try{
+            userService.forgotPassword(emailDTO.getEmail());
+            return new ResponseEntity<>("Sent email successfully", HttpStatus.OK);
+        } catch(Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+    @Operation(summary = "Set password", description = "The user sets a new password from the email forgot password link")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Password set successfully"),
+            @ApiResponse(responseCode = "401", description = "Invalid or same password")
+    })
+    @PostMapping("/set-password/")
+    public ResponseEntity<?> setPassword(@RequestBody SetPasswordDTO setPasswordDTO, @RequestParam String token){
+        try{
+            userService.setPassword(setPasswordDTO.getNewPassword(), token);
+            return new ResponseEntity<>("New password set successfully",HttpStatus.OK);
+        } catch(Exception e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.UNAUTHORIZED);
+        }
+    }
 }
