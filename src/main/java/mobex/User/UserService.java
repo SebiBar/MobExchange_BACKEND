@@ -89,5 +89,6 @@ public class UserService {
             throw new RuntimeException(("New password must contain only letters and/or digits and must be between 6 and 20 characters"));
         }
         user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
     }
 }

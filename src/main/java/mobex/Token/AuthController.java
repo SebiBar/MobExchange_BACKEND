@@ -150,7 +150,7 @@ public class AuthController {
             @ApiResponse(responseCode = "401", description = "Unauthorized - invalid or expired access token / old password doesn't match / invalid new password format")
 
     })
-    @PostMapping("/chagePassword")
+    @PostMapping("/changePassword")
     public ResponseEntity<?> changePassword(@RequestHeader("Authorization") String accessToken,
                                             @RequestBody PasswordDTO passwordDTO){
         try {
