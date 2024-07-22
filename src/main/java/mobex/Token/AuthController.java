@@ -11,6 +11,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+
+// TODO: FIX TOKEN VALIDATION ON TOKEN-BASED REQUESTS
+// fix AuthService first
+
 @RestController
 @RequestMapping("/auth")
 @Tag(name = "Authentication", description = "Endpoints for managing user authentication and authorization.")
@@ -66,8 +70,7 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@RequestHeader("Authorization") String accessToken){
         try {
-            accessToken = accessToken.substring(7); // Remove "Bearer " prefix
-            authService.deleteToken(accessToken);
+            authService.deleteValidToken(accessToken);
             return new ResponseEntity<>("Token deleted", HttpStatus.OK);
         } catch(Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
@@ -83,7 +86,7 @@ public class AuthController {
     @GetMapping("/getUserDetails")
     public ResponseEntity<?> getUserDetails(@RequestHeader("Authorization") String accessToken){
         try {
-            UserDetailsDTO userDetailsDTO = authService.getUserDetails(accessToken);
+            UserDetailsDTO userDetailsDTO = authService.getValidUserDetails(accessToken);
             return new ResponseEntity<>(userDetailsDTO, HttpStatus.OK);
         } catch(Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
@@ -99,7 +102,7 @@ public class AuthController {
     @PostMapping("/getNewRefreshToken")
     public ResponseEntity<?> getNewRefreshToken(@RequestHeader("Authorization") String refreshToken){
         try {
-            TokenDTO tokenDTO = authService.replaceOldToken(refreshToken);
+            TokenDTO tokenDTO = authService.replaceValidOldToken(refreshToken);
             return new ResponseEntity<>(tokenDTO, HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
@@ -117,9 +120,9 @@ public class AuthController {
         try {
             Token token = authService.getTokenByAccessToken(accessToken);
             if (token.isValid())
-                return new ResponseEntity<>("Valid token", HttpStatus.OK);
+                return new ResponseEntity<>("Valid access token", HttpStatus.OK);
             else
-                return new ResponseEntity<>("Expired token", HttpStatus.UNAUTHORIZED);
+                return new ResponseEntity<>("Expired access token", HttpStatus.UNAUTHORIZED);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
         }
@@ -136,11 +139,13 @@ public class AuthController {
         try {
             Token token = authService.getTokenByRefreshToken(refreshToken);
             if (token.isValidRefreshToken())
-                return new ResponseEntity<>("Valid token", HttpStatus.OK);
+                return new ResponseEntity<>("Valid refresh token", HttpStatus.OK);
             else
-                return new ResponseEntity<>("Expired token", HttpStatus.UNAUTHORIZED);
+                return new ResponseEntity<>("Expired refresh token", HttpStatus.UNAUTHORIZED);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
         }
     }
+
+
 }

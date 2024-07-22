@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -24,13 +26,23 @@ public class ExchangeRateController {
                             responseCode = "200"),
                     @ApiResponse(
                             description = "Unauthorized / Invalid Token",
-                            responseCode = "403")
+                            responseCode = "403"),
+                    @ApiResponse(
+                            description = "wrong test url",
+                            responseCode = "404")
+
             })
     @GetMapping("/latest/{baseCurrency}")
-    public String getLatestRates(
+    public ResponseEntity<?> getLatestRates(
             @Parameter(description = "The base currency for which to get the latest exchange rates")
             @PathVariable String baseCurrency) {
-        return exchangeRateService.getLatestRates(baseCurrency);
+        try{
+            return new ResponseEntity<>(exchangeRateService.getLatestRates(baseCurrency), HttpStatus.OK);
+        }
+        catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        }
+
     }
 
     // Get exchange rates for a specific date and currency
@@ -43,12 +55,18 @@ public class ExchangeRateController {
                             responseCode = "403")
             })
     @GetMapping("/{date}/{baseCurrency}")
-    public String getExchangeRatesForDate(
+    public ResponseEntity<?> getExchangeRatesForDate(
             @Parameter(description = "The date for which to get the exchange rates in YYYY-MM-DD format")
             @PathVariable String date,
             @Parameter(description = "The base currency for which to get the exchange rates")
             @PathVariable String baseCurrency) {
-        return exchangeRateService.getRatesForDate(date, baseCurrency);
+        try{
+            return new ResponseEntity<>(exchangeRateService.getRatesForDate(date, baseCurrency), HttpStatus.OK);
+        }
+        catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        }
+
     }
 
     // All rates for a specific period for a defined currency
@@ -61,14 +79,20 @@ public class ExchangeRateController {
                             responseCode = "403")
             })
     @GetMapping("/period/{startDate}/{endDate}/{baseCurrency}")
-    public String getExchangeRatesForPeriod(
+    public ResponseEntity<?> getExchangeRatesForPeriod(
             @Parameter(description = "The start date of the period in YYYY-MM-DD format")
             @PathVariable String startDate,
             @Parameter(description = "The end date of the period in YYYY-MM-DD format")
             @PathVariable String endDate,
             @Parameter(description = "The base currency for which to get the exchange rates")
             @PathVariable String baseCurrency) {
-        return exchangeRateService.getAllRatesForPeriod(startDate, endDate, baseCurrency);
+        try{
+            return new ResponseEntity<>(exchangeRateService.getAllRatesForPeriod(startDate, endDate, baseCurrency), HttpStatus.OK);
+        }
+        catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        }
+
     }
 
     // Historical exchange rates between two currencies for a defined period
@@ -81,7 +105,7 @@ public class ExchangeRateController {
                             responseCode = "403")
             })
     @GetMapping("/historical/{startDate}/{endDate}/{baseCurrency}/{targetCurrency}")
-    public String getHistoricalRatesBetweenCurrencies(
+    public ResponseEntity<?> getHistoricalRatesBetweenCurrencies(
             @Parameter(description = "The start date of the period in YYYY-MM-DD format")
             @PathVariable String startDate,
             @Parameter(description = "The end date of the period in YYYY-MM-DD format")
@@ -90,7 +114,15 @@ public class ExchangeRateController {
             @PathVariable String baseCurrency,
             @Parameter(description = "The target currency for which to get the exchange rates")
             @PathVariable String targetCurrency) {
-        return exchangeRateService.getHistoricalRatesForCurrencies(startDate, endDate, baseCurrency, targetCurrency);
+        try{
+            return new ResponseEntity<>(
+                    exchangeRateService.getHistoricalRatesForCurrencies(startDate, endDate, baseCurrency, targetCurrency),
+                    HttpStatus.OK);
+        }
+        catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        }
+
     }
 
     // Endpoint to get historical rates for two currencies from a specific date until today
@@ -103,14 +135,22 @@ public class ExchangeRateController {
                             responseCode = "403")
             })
     @GetMapping("/historical/{startDate}/{baseCurrency}/{targetCurrency}")
-    public String getHistoricalRatesBetweenCurrenciesFromToNow(
+    public ResponseEntity<?> getHistoricalRatesBetweenCurrenciesFromToNow(
             @Parameter(description = "The start date from which to get the exchange rates in YYYY-MM-DD format")
             @PathVariable String startDate,
             @Parameter(description = "The base currency for which to get the exchange rates")
             @PathVariable String baseCurrency,
             @Parameter(description = "The target currency for which to get the exchange rates")
             @PathVariable String targetCurrency) {
-        return exchangeRateService.getHistoricalRatesFromToNow(startDate, baseCurrency, targetCurrency);
+        try{
+            return new ResponseEntity<>(
+                    exchangeRateService.getHistoricalRatesFromToNow(startDate, baseCurrency, targetCurrency),
+                    HttpStatus.OK);
+        }
+        catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        }
+
     }
 
     // Endpoint to convert currency from one to another using the latest rates
@@ -123,13 +163,19 @@ public class ExchangeRateController {
                             responseCode = "403")
             })
     @GetMapping("/convert")
-    public Double convertCurrency(
+    public ResponseEntity<?> convertCurrency(
             @Parameter(description = "The amount of currency to convert")
             @RequestParam double amount,
             @Parameter(description = "The currency from which to convert")
             @RequestParam String from,
             @Parameter(description = "The currency to which to convert")
             @RequestParam String to) {
-        return exchangeRateService.convertCurrency(amount, from, to);
+        try{
+            return new ResponseEntity<>(exchangeRateService.convertCurrency(amount, from, to), HttpStatus.OK);
+        }
+        catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        }
+
     }
 }

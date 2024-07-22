@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 
 @Service
@@ -54,5 +53,9 @@ public class UserService {
         else {
             throw new RuntimeException("User not found");
         }
+    }
+
+    public Boolean matchPasswords(String pw1, String pw2){
+        return passwordEncoder.matches(pw1, pw2);
     }
 }
