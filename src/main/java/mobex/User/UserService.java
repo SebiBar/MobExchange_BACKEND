@@ -1,5 +1,6 @@
 package mobex.User;
 
+import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -13,12 +14,15 @@ public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final EmailValidator emailValidator;
+    private final EmailService emailService;
 
     @Autowired
-    public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder, EmailValidator emailValidator) {
+    public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder,
+                       EmailValidator emailValidator, EmailService emailService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailValidator = emailValidator;
+        this.emailService = emailService;
     }
 
     @Transactional
@@ -53,5 +57,26 @@ public class UserService {
         else {
             throw new RuntimeException("User not found");
         }
+    }
+
+    @Transactional
+    public void forgotPassword(String email) throws MessagingException {
+        Optional<User> userOptional = userRepository.findByEmail(email);
+        if(userOptional.isPresent()){
+            emailService.sendSetPasswordEmail(email);
+        }
+        else throw new RuntimeException("Email not found");
+    }
+
+    @Transactional
+    public void setPassword(String password, String email){
+        Optional<User> userOptional = userRepository.findByEmail(email);
+        if(userOptional.isPresent()){
+            User user = userOptional.get();
+            String hashedPassword = passwordEncoder.encode(password);
+            user.setPassword(hashedPassword);
+            userRepository.save(user);
+        }
+        else throw new RuntimeException("Invalid email address");
     }
 }

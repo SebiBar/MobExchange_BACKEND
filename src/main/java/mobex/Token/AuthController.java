@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/auth")
 @Tag(name = "Authentication", description = "Endpoints for managing user authentication and authorization.")
@@ -73,6 +75,28 @@ public class AuthController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
         }
     }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody EmailDTO emailDTO){
+        try{
+            userService.forgotPassword(emailDTO.getEmail());
+            return new ResponseEntity<>("Sent email successfully", HttpStatus.OK);
+        } catch(Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+    @PostMapping("/set-password/")
+    public ResponseEntity<?> setPassword(@RequestBody SetPasswordDTO setPasswordDTO, @RequestParam String email){
+        try{
+            userService.setPassword(setPasswordDTO.getNewPassword(), email);
+            return new ResponseEntity<>("New password set successfully",HttpStatus.OK);
+        } catch(Exception e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+
 
     @Operation(summary = "Get user details", description = "Retrieves details of the authenticated user.")
     @Parameter(name = "Authorization", description = "The access token of the authenticated user")
