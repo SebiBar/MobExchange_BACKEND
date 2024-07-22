@@ -1,5 +1,5 @@
 
-package mobex.Config;
+package mobex;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,12 +16,10 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/auth/register", "/auth/login", "/auth/forgot-password").permitAll() // Exclude login and register endpoints from authorization
-                        .anyRequest().permitAll() // Secure other endpoints
+                        .anyRequest().permitAll()
                 );
         return http.build();
     }
-
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder(){

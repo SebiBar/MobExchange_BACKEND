@@ -1,4 +1,5 @@
 package mobex.Token;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -65,7 +66,6 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@RequestHeader("Authorization") String accessToken){
         try {
-            accessToken = accessToken.substring(7); // Remove "Bearer " prefix
             authService.deleteToken(accessToken);
             return new ResponseEntity<>("Token deleted", HttpStatus.OK);
         } catch(Exception e) {
@@ -143,21 +143,28 @@ public class AuthController {
         }
     }
 
-    @Operation(summary = "Change user password", description = "Allows a user to change their password.")
+    @Operation(summary = "Change a user's password", description = "Verifies if an access token is valid, changes old password with a new one")
+    @Parameter(name = "Authorization", description = "The access token to be verified")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Password changed successfully."),
-            @ApiResponse(responseCode = "401", description = "Unauthorized - Invalid old password or user not found.")
+            @ApiResponse(responseCode = "200", description = "Password changed successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - invalid or expired access token / old password doesn't match / invalid new password format")
+
     })
-    @PostMapping("/change-password")
-    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordDTO changePasswordDTO) {
+    @PostMapping("/changePassword")
+    public ResponseEntity<?> changePassword(@RequestHeader("Authorization") String accessToken,
+                                            @RequestBody PasswordDTO passwordDTO){
         try {
-            authService.changePassword(changePasswordDTO.getEmail(), changePasswordDTO.getOldPassword(), changePasswordDTO.getNewPassword());
-            return new ResponseEntity<>("Password changed successfully.", HttpStatus.OK);
-        } catch(Exception e) {
+            Token token = authService.getTokenByAccessToken(accessToken);
+            if(token.isValid()){
+                User user = authService.getUserByAccessToken(accessToken);
+                userService.changePassword(user, passwordDTO);
+                return new ResponseEntity<>("Password changed successfully", HttpStatus.OK);
+            }
+            else{
+                return new ResponseEntity<>("Expired access token", HttpStatus.UNAUTHORIZED);
+            }
+        } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
         }
     }
-
-    //TODO: implement forgot-password endpoint with no token authorization and
-    // change change-password endpoint to require token authorization
 }
