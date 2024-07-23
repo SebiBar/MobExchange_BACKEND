@@ -6,6 +6,7 @@ import mobex.User.UserDetailsDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.NotActiveException;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
@@ -40,14 +41,14 @@ public class AuthService {
     }
 
     @Transactional
-    public TokenDTO replaceValidOldToken(String refreshToken) {
+    public TokenDTO replaceValidOldToken(String refreshToken) throws NotActiveException {
         Token token = getValidTokenByRefreshToken(refreshToken);
         User user = token.getUser();
         tokenRepository.delete(token);  //deletes old token
         return this.createTokenReturnDTO(user); // returns new token in DTO form
     }
 
-    public UserDetailsDTO getValidUserDetails(String accessToken) {
+    public UserDetailsDTO getValidUserDetails(String accessToken) throws NotActiveException {
         Token token = getValidTokenByAccessToken(accessToken);
         if (token.isValid()) {    //if after today -> not expired
             User user = token.getUser();
@@ -60,8 +61,13 @@ public class AuthService {
             throw new RuntimeException("Access token expired");
     }
 
+    public User getUserByValidAccessToken(String accessToken) throws NotActiveException {
+        Token token = getValidTokenByAccessToken(accessToken);
+        return token.getUser();
+    }
+
     @Transactional
-    public void deleteValidToken(String accessToken) {
+    public void deleteValidToken(String accessToken) throws NotActiveException {
         Token token = getValidTokenByAccessToken(accessToken);
         tokenRepository.delete(token);
     }
@@ -84,20 +90,20 @@ public class AuthService {
         throw new RuntimeException("Token not found");
     }
 
-    public Token getValidTokenByAccessToken(String accessToken) {
+    public Token getValidTokenByAccessToken(String accessToken) throws NotActiveException {
         Token token = getTokenByAccessToken(accessToken);
         if (token.isValid()) {
             return token;
         }
-        throw new RuntimeException("Token has expired");
+        throw new NotActiveException("Token has expired");
     }
 
-    public Token getValidTokenByRefreshToken(String refreshToken) {
+    public Token getValidTokenByRefreshToken(String refreshToken) throws NotActiveException {
         Token token = getTokenByRefreshToken(refreshToken);
         if (token.isValidRefreshToken()) {
             return token;
         }
-        throw new RuntimeException("Token has expired");
+        throw new NotActiveException("Token has expired");
     }
 
     private String generateTokenValue() {

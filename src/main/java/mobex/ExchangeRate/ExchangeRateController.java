@@ -4,9 +4,14 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import mobex.Token.AuthService;
+import mobex.Token.Token;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+
+// TODO: handle NotActiveExceptions from accessTokens
 
 @RestController
 @RequestMapping("/exchange-rates")
@@ -14,9 +19,11 @@ import org.springframework.web.bind.annotation.*;
 public class ExchangeRateController {
 
     private final ExchangeRateService exchangeRateService;
+    private final AuthService authService;
 
-    public ExchangeRateController(ExchangeRateService exchangeRateService) {
+    public ExchangeRateController(ExchangeRateService exchangeRateService, AuthService authService) {
         this.exchangeRateService = exchangeRateService;
+        this.authService = authService;
     }
 
     // Get latest exchange rates for a defined currency
@@ -34,9 +41,11 @@ public class ExchangeRateController {
             })
     @GetMapping("/latest/{baseCurrency}")
     public ResponseEntity<?> getLatestRates(
+            @RequestHeader("Authorization") String accessToken,
             @Parameter(description = "The base currency for which to get the latest exchange rates")
             @PathVariable String baseCurrency) {
         try{
+            authService.getValidTokenByAccessToken(accessToken);
             return new ResponseEntity<>(exchangeRateService.getLatestRates(baseCurrency), HttpStatus.OK);
         }
         catch (Exception e){
@@ -56,11 +65,13 @@ public class ExchangeRateController {
             })
     @GetMapping("/{date}/{baseCurrency}")
     public ResponseEntity<?> getExchangeRatesForDate(
+            @RequestHeader("Authorization") String accessToken,
             @Parameter(description = "The date for which to get the exchange rates in YYYY-MM-DD format")
             @PathVariable String date,
             @Parameter(description = "The base currency for which to get the exchange rates")
             @PathVariable String baseCurrency) {
         try{
+            authService.getValidTokenByAccessToken(accessToken);
             return new ResponseEntity<>(exchangeRateService.getRatesForDate(date, baseCurrency), HttpStatus.OK);
         }
         catch (Exception e){
@@ -80,6 +91,7 @@ public class ExchangeRateController {
             })
     @GetMapping("/period/{startDate}/{endDate}/{baseCurrency}")
     public ResponseEntity<?> getExchangeRatesForPeriod(
+            @RequestHeader("Authorization") String accessToken,
             @Parameter(description = "The start date of the period in YYYY-MM-DD format")
             @PathVariable String startDate,
             @Parameter(description = "The end date of the period in YYYY-MM-DD format")
@@ -87,6 +99,7 @@ public class ExchangeRateController {
             @Parameter(description = "The base currency for which to get the exchange rates")
             @PathVariable String baseCurrency) {
         try{
+            authService.getValidTokenByAccessToken(accessToken);
             return new ResponseEntity<>(exchangeRateService.getAllRatesForPeriod(startDate, endDate, baseCurrency), HttpStatus.OK);
         }
         catch (Exception e){
@@ -106,6 +119,7 @@ public class ExchangeRateController {
             })
     @GetMapping("/historical/{startDate}/{endDate}/{baseCurrency}/{targetCurrency}")
     public ResponseEntity<?> getHistoricalRatesBetweenCurrencies(
+            @RequestHeader("Authorization") String accessToken,
             @Parameter(description = "The start date of the period in YYYY-MM-DD format")
             @PathVariable String startDate,
             @Parameter(description = "The end date of the period in YYYY-MM-DD format")
@@ -115,6 +129,7 @@ public class ExchangeRateController {
             @Parameter(description = "The target currency for which to get the exchange rates")
             @PathVariable String targetCurrency) {
         try{
+            authService.getValidTokenByAccessToken(accessToken);
             return new ResponseEntity<>(
                     exchangeRateService.getHistoricalRatesForCurrencies(startDate, endDate, baseCurrency, targetCurrency),
                     HttpStatus.OK);
@@ -136,6 +151,7 @@ public class ExchangeRateController {
             })
     @GetMapping("/historical/{startDate}/{baseCurrency}/{targetCurrency}")
     public ResponseEntity<?> getHistoricalRatesBetweenCurrenciesFromToNow(
+            @RequestHeader("Authorization") String accessToken,
             @Parameter(description = "The start date from which to get the exchange rates in YYYY-MM-DD format")
             @PathVariable String startDate,
             @Parameter(description = "The base currency for which to get the exchange rates")
@@ -143,6 +159,7 @@ public class ExchangeRateController {
             @Parameter(description = "The target currency for which to get the exchange rates")
             @PathVariable String targetCurrency) {
         try{
+            authService.getValidTokenByAccessToken(accessToken);
             return new ResponseEntity<>(
                     exchangeRateService.getHistoricalRatesFromToNow(startDate, baseCurrency, targetCurrency),
                     HttpStatus.OK);
@@ -164,6 +181,7 @@ public class ExchangeRateController {
             })
     @GetMapping("/convert")
     public ResponseEntity<?> convertCurrency(
+            @RequestHeader("Authorization") String accessToken,
             @Parameter(description = "The amount of currency to convert")
             @RequestParam double amount,
             @Parameter(description = "The currency from which to convert")
@@ -171,6 +189,7 @@ public class ExchangeRateController {
             @Parameter(description = "The currency to which to convert")
             @RequestParam String to) {
         try{
+            authService.getValidTokenByAccessToken(accessToken);
             return new ResponseEntity<>(exchangeRateService.convertCurrency(amount, from, to), HttpStatus.OK);
         }
         catch (Exception e){
