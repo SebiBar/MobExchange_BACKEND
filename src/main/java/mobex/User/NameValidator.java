@@ -13,9 +13,9 @@ public class NameValidator {
 
     public boolean isValidName(String name) {
         if(name == null) {
-            return false;
+            return true;
         }
         Matcher matcher = pattern.matcher(name);
-        return matcher.matches();
+        return !matcher.matches();
     }
 }

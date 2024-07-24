@@ -28,16 +28,17 @@ public class AuthController {
     @Operation(summary = "Register a new user", description = "Creates a new user account and returns the authentication token.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "User registered successfully and token created"),
+            @ApiResponse(responseCode = "400", description = "Bad Request - Invalid data."),
             @ApiResponse(responseCode = "401", description = "Registration failed due to some authentication-related issue (e.g., username already taken, invalid data).")
     })
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody User userData){
+    public ResponseEntity<?> register(@RequestBody User userData) {
         try {
             User user = userService.registerUser(userData);
             TokenDTO tokenDTO = authService.createTokenReturnDTO(user);
             return new ResponseEntity<>(tokenDTO, HttpStatus.CREATED);
         } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 

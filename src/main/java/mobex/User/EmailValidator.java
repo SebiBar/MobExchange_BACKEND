@@ -13,8 +13,8 @@ public class EmailValidator {
 
     public boolean isValidEmail(String email) {
         if(email == null)
-            return false;
+            return true;
         Matcher matcher = pattern.matcher(email);
-        return matcher.matches();
+        return !matcher.matches();
     }
 }

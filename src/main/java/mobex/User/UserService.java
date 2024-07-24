@@ -37,17 +37,17 @@ public class UserService {
     @Transactional
     public User registerUser(User user){
         String userFirstName = user.getFirstname();
-        if(!nameValidator.isValidName(userFirstName) ){
+        if(nameValidator.isValidName(userFirstName)){
             throw new RuntimeException("First name is not valid " + userFirstName);
         }
 
         String userLastName = user.getLastname();
-        if(!nameValidator.isValidName(userLastName) ){
+        if(nameValidator.isValidName(userLastName)){
             throw new RuntimeException("Last name is not valid " + userLastName);
         }
 
         String userEmail = user.getEmail();
-        if(!emailValidator.isValidEmail(userEmail)) {
+        if(emailValidator.isValidEmail(userEmail)) {
             throw new RuntimeException(("Email is not valid " + userEmail));
         }
         if (userRepository.findByEmail(userEmail).isPresent()) {
