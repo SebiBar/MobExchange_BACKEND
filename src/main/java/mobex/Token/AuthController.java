@@ -52,6 +52,7 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody UserDTO userDTO){
         try {
             User user = userService.loginUser(userDTO);
+            authService.verifyTokens(user);
             TokenDTO tokenDTO = authService.createTokenReturnDTO(user);
             return new ResponseEntity<>(tokenDTO, HttpStatus.OK);
         } catch (Exception e) {
