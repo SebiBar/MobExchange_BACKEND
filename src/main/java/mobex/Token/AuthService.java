@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.NotActiveException;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -104,6 +105,14 @@ public class AuthService {
             return token;
         }
         throw new NotActiveException("Token has expired");
+      
+    public void verifyTokens(User user){
+        List<Token> tokenList = tokenRepository.findAllByUser(user);
+        for (Token token: tokenList) {
+            if(!token.isValidRefreshToken()){
+                tokenRepository.delete(token);
+            }
+        }
     }
 
     private String generateTokenValue() {
