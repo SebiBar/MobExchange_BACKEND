@@ -7,6 +7,7 @@ import mobex.User.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -89,6 +90,15 @@ public class AuthService {
             return tokenOptional.get();
         }
         throw new RuntimeException("Token not found");
+    }
+
+    public void verifyTokens(User user){
+        List<Token> tokenList = tokenRepository.findAllByUser(user);
+        for (Token token: tokenList) {
+            if(!token.isValidRefreshToken()){
+                tokenRepository.delete(token);
+            }
+        }
     }
 
     private String generateTokenValue() {
