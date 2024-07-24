@@ -39,7 +39,7 @@ public class Token {
 
     public Token(String s, LocalDateTime localDateTime, String s1, LocalDateTime localDateTime1, User user) {
         this.accessToken = s;
-        this.accessTokenExpires = localDateTime;   //scris foarte prost
+        this.accessTokenExpires = localDateTime;
         this.refreshToken = s1;
         this.refreshTokenExpires = localDateTime1;
         this.user = user;

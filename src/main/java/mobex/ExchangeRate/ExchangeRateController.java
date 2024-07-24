@@ -5,10 +5,11 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import mobex.Token.AuthService;
-import mobex.Token.Token;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.NotActiveException;
 
 
 // TODO: handle NotActiveExceptions from accessTokens
@@ -29,14 +30,9 @@ public class ExchangeRateController {
     // Get latest exchange rates for a defined currency
     @Operation(summary = "Get latest exchange rates for a defined currency",
             responses = {
-                    @ApiResponse(description = "Exchange rates retrieved successfully",
-                            responseCode = "200"),
-                    @ApiResponse(
-                            description = "Unauthorized / Invalid Token",
-                            responseCode = "403"),
-                    @ApiResponse(
-                            description = "wrong test url",
-                            responseCode = "404")
+                    @ApiResponse(description = "Exchange rates retrieved successfully", responseCode = "200"),
+                    @ApiResponse(description = "Expired token", responseCode = "401"),
+                    @ApiResponse(description = "Invalid token", responseCode = "400")
 
             })
     @GetMapping("/latest/{baseCurrency}")
@@ -47,21 +43,20 @@ public class ExchangeRateController {
         try{
             authService.getValidTokenByAccessToken(accessToken);
             return new ResponseEntity<>(exchangeRateService.getLatestRates(baseCurrency), HttpStatus.OK);
+        }catch (NotActiveException e){
+            return new ResponseEntity<>("Access Token expired", HttpStatus.UNAUTHORIZED);
         }
         catch (Exception e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
-
     }
 
     // Get exchange rates for a specific date and currency
     @Operation(summary = "Get exchange rates for a specific date and currency",
             responses = {
-                    @ApiResponse(description = "Exchange rates retrieved successfully",
-                            responseCode = "200"),
-                    @ApiResponse(
-                            description = "Unauthorized / Invalid Token",
-                            responseCode = "403")
+                    @ApiResponse(description = "Exchange rates retrieved successfully", responseCode = "200"),
+                    @ApiResponse(description = "Expired token", responseCode = "401"),
+                    @ApiResponse(description = "Invalid Token", responseCode = "400")
             })
     @GetMapping("/{date}/{baseCurrency}")
     public ResponseEntity<?> getExchangeRatesForDate(
@@ -73,21 +68,19 @@ public class ExchangeRateController {
         try{
             authService.getValidTokenByAccessToken(accessToken);
             return new ResponseEntity<>(exchangeRateService.getRatesForDate(date, baseCurrency), HttpStatus.OK);
+        }catch (NotActiveException e){
+            return new ResponseEntity<>("Access Token expired", HttpStatus.UNAUTHORIZED);
+        }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
-        catch (Exception e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
-        }
-
     }
 
     // All rates for a specific period for a defined currency
     @Operation(summary = "Get all rates for a specific period for a defined currency",
             responses = {
-                    @ApiResponse(description = "Exchange rates retrieved successfully",
-                            responseCode = "200"),
-                    @ApiResponse(
-                            description = "Unauthorized / Invalid Token",
-                            responseCode = "403")
+                    @ApiResponse(description = "Exchange rates retrieved successfully", responseCode = "200"),
+                    @ApiResponse(description = "Expired token", responseCode = "401"),
+                    @ApiResponse(description = "Invalid Token", responseCode = "400")
             })
     @GetMapping("/period/{startDate}/{endDate}/{baseCurrency}")
     public ResponseEntity<?> getExchangeRatesForPeriod(
@@ -101,21 +94,19 @@ public class ExchangeRateController {
         try{
             authService.getValidTokenByAccessToken(accessToken);
             return new ResponseEntity<>(exchangeRateService.getAllRatesForPeriod(startDate, endDate, baseCurrency), HttpStatus.OK);
+        }catch (NotActiveException e){
+            return new ResponseEntity<>("Access Token expired", HttpStatus.UNAUTHORIZED);
+        }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
-        catch (Exception e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
-        }
-
     }
 
     // Historical exchange rates between two currencies for a defined period
     @Operation(summary = "Get historical exchange rates between two currencies for a defined period",
             responses = {
-                    @ApiResponse(description = "Exchange rates retrieved successfully",
-                            responseCode = "200"),
-                    @ApiResponse(
-                            description = "Unauthorized / Invalid Token",
-                            responseCode = "403")
+                    @ApiResponse(description = "Exchange rates retrieved successfully", responseCode = "200"),
+                    @ApiResponse(description = "Expired token", responseCode = "401"),
+                    @ApiResponse(description = "Invalid Token", responseCode = "400")
             })
     @GetMapping("/historical/{startDate}/{endDate}/{baseCurrency}/{targetCurrency}")
     public ResponseEntity<?> getHistoricalRatesBetweenCurrencies(
@@ -133,9 +124,10 @@ public class ExchangeRateController {
             return new ResponseEntity<>(
                     exchangeRateService.getHistoricalRatesForCurrencies(startDate, endDate, baseCurrency, targetCurrency),
                     HttpStatus.OK);
-        }
-        catch (Exception e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        }catch (NotActiveException e){
+            return new ResponseEntity<>("Access Token expired", HttpStatus.UNAUTHORIZED);
+        }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
 
     }
@@ -143,11 +135,9 @@ public class ExchangeRateController {
     // Endpoint to get historical rates for two currencies from a specific date until today
     @Operation(summary = "Get historical rates for two currencies from a specific date until today",
             responses = {
-                    @ApiResponse(description = "Exchange rates retrieved successfully",
-                            responseCode = "200"),
-                    @ApiResponse(
-                            description = "Unauthorized / Invalid Token",
-                            responseCode = "403")
+                    @ApiResponse(description = "Exchange rates retrieved successfully", responseCode = "200"),
+                    @ApiResponse(description = "Expired token", responseCode = "401"),
+                    @ApiResponse(description = "Invalid Token", responseCode = "400")
             })
     @GetMapping("/historical/{startDate}/{baseCurrency}/{targetCurrency}")
     public ResponseEntity<?> getHistoricalRatesBetweenCurrenciesFromToNow(
@@ -163,9 +153,10 @@ public class ExchangeRateController {
             return new ResponseEntity<>(
                     exchangeRateService.getHistoricalRatesFromToNow(startDate, baseCurrency, targetCurrency),
                     HttpStatus.OK);
-        }
-        catch (Exception e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        }catch (NotActiveException e){
+            return new ResponseEntity<>("Access Token expired", HttpStatus.UNAUTHORIZED);
+        }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
 
     }
@@ -173,11 +164,9 @@ public class ExchangeRateController {
     // Endpoint to convert currency from one to another using the latest rates
     @Operation(summary = "Convert currency from one to another using the latest rates",
             responses = {
-                    @ApiResponse(description = "Exchange rates retrieved successfully",
-                            responseCode = "200"),
-                    @ApiResponse(
-                            description = "Unauthorized / Invalid Token",
-                            responseCode = "403")
+                    @ApiResponse(description = "Exchange rates retrieved successfully", responseCode = "200"),
+                    @ApiResponse(description = "Expired token", responseCode = "401"),
+                    @ApiResponse(description = "Invalid Token", responseCode = "400")
             })
     @GetMapping("/convert")
     public ResponseEntity<?> convertCurrency(
@@ -191,9 +180,10 @@ public class ExchangeRateController {
         try{
             authService.getValidTokenByAccessToken(accessToken);
             return new ResponseEntity<>(exchangeRateService.convertCurrency(amount, from, to), HttpStatus.OK);
-        }
-        catch (Exception e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        }catch (NotActiveException e){
+            return new ResponseEntity<>("Access Token expired", HttpStatus.UNAUTHORIZED);
+        }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
 
     }

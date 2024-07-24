@@ -12,8 +12,9 @@ public class EmailValidator {
     private static final Pattern pattern = Pattern.compile(EMAIL_PATTERN);
 
     public boolean isValidEmail(String email) {
-        if(email == null)
+        if(email == null){
             return false;
+        }
         Matcher matcher = pattern.matcher(email);
         return matcher.matches();
     }
