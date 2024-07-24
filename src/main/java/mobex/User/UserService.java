@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.io.NotActiveException;
 import java.util.Optional;
 
 @Service
@@ -111,7 +112,7 @@ public class UserService {
     }
 
     @Transactional
-    public void setPassword(String password, String token){
+    public void setPassword(String password, String token) throws NotActiveException {
         Optional<ResetPasswordToken> tokenOptional = resetPasswordTokenRepository.findByToken(token);
         if(tokenOptional.isPresent()){
             ResetPasswordToken resetPasswordToken = tokenOptional.get();
@@ -128,7 +129,7 @@ public class UserService {
                 }
                 else throw new RuntimeException("Invalid password format");
             }
-            else throw new RuntimeException("Reset password token is expired");
+            else throw new NotActiveException("Reset password token is expired");
         }
         else throw new RuntimeException("Invalid email address");
     }
