@@ -105,6 +105,7 @@ public class AuthService {
             return token;
         }
         throw new NotActiveException("Token has expired");
+    }
 
     public void verifyTokens(User user){
         List<Token> tokenList = tokenRepository.findAllByUser(user);
