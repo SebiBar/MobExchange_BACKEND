@@ -1,10 +1,14 @@
 package mobex.User;
 
+import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
+import mobex.Token.ResetPasswordToken;
+import mobex.Token.ResetPasswordTokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.io.NotActiveException;
 import java.util.Optional;
 
 @Service
@@ -15,16 +19,20 @@ public class UserService {
     private final EmailValidator emailValidator;
     private final NameValidator nameValidator;
     private final PasswordValidator passwordValidator;
+    private final EmailService emailService;
+    private final ResetPasswordTokenRepository resetPasswordTokenRepository;
 
     @Autowired
     public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder,
                        EmailValidator emailValidator, NameValidator nameValidator,
-                       PasswordValidator passwordValidator) {
+                       PasswordValidator passwordValidator, EmailService emailService, ResetPasswordTokenRepository resetPasswordTokenRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailValidator = emailValidator;
         this.nameValidator = nameValidator;
         this.passwordValidator = passwordValidator;
+        this.emailService = emailService;
+        this.resetPasswordTokenRepository = resetPasswordTokenRepository;
     }
 
     @Transactional
@@ -90,5 +98,39 @@ public class UserService {
         }
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
+    }
+
+    @Transactional
+    public void forgotPassword(String email) throws MessagingException {
+        Optional<User> userOptional = userRepository.findByEmail(email);
+        if(userOptional.isPresent()){
+            ResetPasswordToken token = new ResetPasswordToken(userOptional.get());
+            resetPasswordTokenRepository.save(token);
+            emailService.sendSetPasswordEmail(email, token.getToken());
+        }
+        else throw new RuntimeException("Email not found");
+    }
+
+    @Transactional
+    public void setPassword(String password, String token) throws NotActiveException {
+        Optional<ResetPasswordToken> tokenOptional = resetPasswordTokenRepository.findByToken(token);
+        if(tokenOptional.isPresent()){
+            ResetPasswordToken resetPasswordToken = tokenOptional.get();
+            if(resetPasswordToken.isValid()){
+                User user = tokenOptional.get().getUser();
+                if(passwordValidator.isValidPassword(password)){
+                    if(!passwordEncoder.matches(password,user.getPassword())){
+                        String hashedPassword = passwordEncoder.encode(password);
+                        user.setPassword(hashedPassword);
+                        resetPasswordTokenRepository.delete(resetPasswordToken);
+                        userRepository.save(user);
+                    }
+                    else throw new RuntimeException("New password can't match old password");
+                }
+                else throw new RuntimeException("Invalid password format");
+            }
+            else throw new NotActiveException("Reset password token is expired");
+        }
+        else throw new RuntimeException("Invalid email address");
     }
 }
