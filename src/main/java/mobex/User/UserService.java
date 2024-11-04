@@ -133,4 +133,10 @@ public class UserService {
         }
         else throw new RuntimeException("Invalid email address");
     }
+
+    // Adaugă noua metodă aici
+    public boolean isValidResetToken(String token) {
+        Optional<ResetPasswordToken> tokenOptional = resetPasswordTokenRepository.findByToken(token);
+        return tokenOptional.isPresent() && tokenOptional.get().isValid();
+    }
 }

@@ -28,7 +28,7 @@ public class EmailService {
                 "<html>" +
                         "<body>" +
                         "<p>Click the button below to set your password:</p>" +
-                        "<a href=\"http://localhost:8080/auth/set-password/?token=%s\" style=\"" +
+                        "<a href=\"http://localhost:8080/auth/resetPassword?token=%s\" style=\"" +
                         "display: inline-block; " +
                         "padding: 10px 20px; " +
                         "font-size: 16px; " +

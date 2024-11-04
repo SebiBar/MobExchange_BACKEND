@@ -9,11 +9,14 @@ import mobex.User.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.ui.Model;
 
 import java.io.NotActiveException;
+import org.springframework.http.MediaType;
 
-@RestController
+@Controller  // Changed from @RestController
 @RequestMapping("/auth")
 @Tag(name = "Authentication", description = "Endpoints for managing user authentication and authorization.")
 public class AuthController {
@@ -163,7 +166,11 @@ public class AuthController {
             @ApiResponse(responseCode = "200", description = "Email sent successfully"),
             @ApiResponse(responseCode = "400", description = "Email does not exist in the database")
     })
-    @PostMapping("/forgotPassword")
+
+
+
+    // Pentru API calls
+    @PostMapping(value = "/forgotPassword", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> forgotPassword(@RequestBody EmailDTO emailDTO){
         try{
             userService.forgotPassword(emailDTO.getEmail());
@@ -173,21 +180,81 @@ public class AuthController {
         }
     }
 
+    // Pentru form submissions
+    @PostMapping(value = "/forgotPassword", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public String processForgotPasswordForm(@RequestParam("email") String email, Model model) {
+        try {
+            userService.forgotPassword(email);
+            model.addAttribute("message", "Un email cu instrucțiuni de resetare a parolei a fost trimis.");
+        } catch (Exception e) {
+            model.addAttribute("error", e.getMessage());
+        }
+        return "forgotPassword";
+    }
+
     @Operation(summary = "Set password", description = "The user sets a new password from the email forgot password link")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Password set successfully"),
             @ApiResponse(responseCode = "401", description = "Reset token expired"),
             @ApiResponse(responseCode = "400", description = "Invalid or same password")
     })
-    @PostMapping("/setPassword/")
-    public ResponseEntity<?> setPassword(@RequestBody SetPasswordDTO setPasswordDTO, @RequestParam String token){
-        try{
-            userService.setPassword(setPasswordDTO.getNewPassword(), token);
-            return new ResponseEntity<>("New password set successfully",HttpStatus.OK);
-        }catch (NotActiveException e){
+
+
+    @PostMapping(value = "/setPassword", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public ResponseEntity<?> setPassword(@RequestParam String token,
+                                        @RequestParam String password) {
+        try {
+            userService.setPassword(password, token);
+            return new ResponseEntity<>("New password set successfully", HttpStatus.OK);
+        } catch (NotActiveException e) {
             return new ResponseEntity<>("Reset token expired", HttpStatus.UNAUTHORIZED);
-        }catch(Exception e){
-            return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @PostMapping(value = "/setPassword", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> setPasswordApi(@RequestBody SetPasswordDTO setPasswordDTO, 
+                                            @RequestParam String token) {
+        try {
+            userService.setPassword(setPasswordDTO.getNewPassword(), token);
+            return new ResponseEntity<>("New password set successfully", HttpStatus.OK);
+        } catch (NotActiveException e) {
+            return new ResponseEntity<>("Reset token expired", HttpStatus.UNAUTHORIZED);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    // Metode adaugate de blackbox ai
+    @GetMapping("/forgotPassword")
+    public String showForgotPasswordForm() {
+        return "forgotPassword";
+    }
+
+    
+
+    @GetMapping("/resetPassword")
+    public String showResetPasswordForm(@RequestParam("token") String token, Model model) {
+        if (userService.isValidResetToken(token)) {
+            model.addAttribute("token", token);
+            return "resetPassword";
+        } else {
+            model.addAttribute("error", "Token invalid sau expirat.");
+            return "error";
+        }
+    }
+
+    @PostMapping("/resetPassword")
+    public String processResetPassword(@RequestParam("token") String token, 
+                                    @RequestParam("password") String password, 
+                                    Model model) {
+        try {
+            userService.setPassword(password, token);
+            model.addAttribute("message", "Parola a fost resetată cu succes.");
+        } catch (Exception e) {
+            model.addAttribute("error", e.getMessage());
+        }
+        return "resetPassword";
     }
 }
