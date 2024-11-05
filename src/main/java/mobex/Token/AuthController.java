@@ -167,9 +167,6 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "Email does not exist in the database")
     })
 
-
-
-    // Pentru API calls
     @PostMapping(value = "/forgotPassword", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> forgotPassword(@RequestBody EmailDTO emailDTO){
         try{
@@ -180,7 +177,6 @@ public class AuthController {
         }
     }
 
-    // Pentru form submissions
     @PostMapping(value = "/forgotPassword", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public String processForgotPasswordForm(@RequestParam("email") String email, Model model) {
         try {
@@ -226,13 +222,11 @@ public class AuthController {
         }
     }
 
-    // Metode adaugate de blackbox ai
     @GetMapping("/forgotPassword")
     public String showForgotPasswordForm() {
         return "forgotPassword";
     }
 
-    
 
     @GetMapping("/resetPassword")
     public String showResetPasswordForm(@RequestParam("token") String token, Model model) {
