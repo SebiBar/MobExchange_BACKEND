@@ -12,8 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import java.io.NotActiveException;
 
 
-// TODO: handle NotActiveExceptions from accessTokens
-
 @RestController
 @RequestMapping("/exchange-rates")
 @Tag(name = "Exchange Rate Management", description = "Endpoints for retrieving and converting exchange rates.")

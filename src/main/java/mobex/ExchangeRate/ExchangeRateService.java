@@ -54,8 +54,15 @@ public class ExchangeRateService {
                 .queryParam("to", toCurrency)
                 .toUriString();
 
+        @SuppressWarnings("unchecked")
         Map<String, Object> response = restTemplate.getForObject(url, Map.class);
-        Map<String, Double> rates = (Map<String, Double>) response.get("rates");
-        return rates.get(toCurrency);
+
+        if (response != null) {
+            @SuppressWarnings("unchecked")
+            Map<String, Double> rates = (Map<String, Double>) response.get("rates");
+            return rates.get(toCurrency);
+        } else {
+            throw new RuntimeException("Response is null");
+        }
     }
 }
