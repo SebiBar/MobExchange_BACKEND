@@ -9,7 +9,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.beans.factory.annotation.Value;
-import mobex.exceptions.CustomException; // Importă clasa CustomException
+import mobex.exceptions.CustomException; 
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,8 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+
 
 
 @Service
@@ -49,10 +48,6 @@ public class NewsService {
         this.objectMapper = objectMapper;
     }
 
-    // public List<Map<String, Object>> getStocksNews() {
-    //     String url = String.format(STOCKS_NEWS_URL, apiKey);
-    //     return fetchNews(url);
-    // }
 
     private void saveArticlesToFile(List<Map<String, Object>> articles) {
         try {
