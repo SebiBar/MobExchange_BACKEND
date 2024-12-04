@@ -9,21 +9,11 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.beans.factory.annotation.Value;
-import mobex.exceptions.CustomException; 
+import mobex.exceptions.CustomException; // Importă clasa CustomException
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-
-// imports for files reading and writing
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.io.File;
-import java.io.IOException;
-
-
 
 @Service
 public class NewsService {
@@ -31,7 +21,6 @@ public class NewsService {
     @Value("${news-api.apiKey}")
     private String apiKey;
     private RestTemplate restTemplate;
-    private final ObjectMapper objectMapper;
 
     private static final String STOCKS_NEWS_URL = "https://newsapi.org/v2/everything?q=stocks&apiKey=%s";
     private static final String CRYPTO_NEWS_URL = "https://newsapi.org/v2/everything?q=cryptocurrency+bitcoin+ethereum&apiKey=%s";
@@ -40,52 +29,13 @@ public class NewsService {
     private static final String PRECIOUS_METALS_NEWS_URL = "https://newsapi.org/v2/everything?q=precious+metals+gold+silver&apiKey=%s";
     private static final String BUSINESS_NEWS_URL = "https://newsapi.org/v2/everything?q=business&sortBy=publishedAt&pageSize=100&apiKey=%s";
 
-    private static final String JSON_FILE_PATH = "stocks_news.json"; // Calea fișierului JSON
-
-
-    public NewsService(RestTemplate restTemplate, ObjectMapper objectMapper) {
+    public NewsService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
-        this.objectMapper = objectMapper;
-    }
-
-
-    private void saveArticlesToFile(List<Map<String, Object>> articles) {
-        try {
-            objectMapper.writeValue(new File(JSON_FILE_PATH), articles); // Scrie articolele în fișier
-        } catch (IOException e) {
-            throw new CustomException("Error saving articles to file: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    private List<Map<String, Object>> readArticlesFromFile() {
-        try {
-            File file = new File(JSON_FILE_PATH);
-            if (file.exists() && file.length() > 0) {
-                return objectMapper.readValue(file, new TypeReference<List<Map<String, Object>>>() {}); // Citește articolele din fișier
-            }
-        } catch (IOException e) {
-            throw new CustomException("Error reading articles from file: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        return null; // Returnăm null dacă fișierul nu există sau este gol
     }
 
     public List<Map<String, Object>> getStocksNews() {
-        // Încercăm să citim datele din fișier
-        List<Map<String, Object>> articles = readArticlesFromFile();
-        if (articles != null && !articles.isEmpty()) {
-            System.out.println("Citirea articolelor din fisier JSON."); // Logare
-            return articles; // Returnăm articolele din fișier
-        }
-
-        // Dacă fișierul nu există sau este gol, facem un request la API
         String url = String.format(STOCKS_NEWS_URL, apiKey);
-        System.out.println("Facem request la API pentru a obtine articolele."); // Logare
-        articles = fetchNews(url);
-        
-        // Salvăm articolele în fișier
-        saveArticlesToFile(articles);
-        
-        return articles;
+        return fetchNews(url);
     }
 
     public List<Map<String, Object>> getCryptoNews() {

@@ -36,11 +36,6 @@ dependencies {
 	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 	testImplementation 'org.springframework.security:spring-security-test'
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-
-
-    // for reading and writing JSON
-	implementation 'com.h2database:h2'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
 tasks.named('test') {
