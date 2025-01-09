@@ -50,6 +50,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -78,10 +79,31 @@ public class MarketsController {
     @GetMapping("/world-indices")
     public ResponseEntity<String> getWorldIndices() {
         try {
-            String response = marketsService.getWorldIndicesFromFile();
+            String response = marketsService.fetchWorldIndices();
             return ResponseEntity.ok(response);
         } catch (IOException e) {
-            return ResponseEntity.status(500).body("Error reading from file: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error writing to file: " + e.getMessage());
+        }
+    }
+
+    // **********************************
+    //  STOCKS SIMBOL REQUESTS
+    // **********************************
+    @Operation(summary = "Get Stock Chart Data",
+           description = "Retrieves the latest chart data for a specific stock symbol.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved stock chart data."),
+            @ApiResponse(responseCode = "401", description = "Invalid API key."),
+            @ApiResponse(responseCode = "403", description = "You are not subscribed to this API."),
+            @ApiResponse(responseCode = "500", description = "Internal server error.")
+    })
+    @GetMapping("/stock-chart")
+    public ResponseEntity<String> getStockChartData(@RequestParam String symbol) {
+        try {
+            String response = marketsService.fetchStockChartData(symbol);
+            return ResponseEntity.ok(response);
+        } catch (IOException e) {
+            return ResponseEntity.status(500).body("Error fetching stock chart data: " + e.getMessage());
         }
     }
 }
