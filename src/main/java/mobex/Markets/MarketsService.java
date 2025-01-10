@@ -26,6 +26,7 @@ public class MarketsService {
 
     private static final String STOCKS_DIRECTORY = "stocks_directory";
     private static final long ONE_WEEK = 604800000; // 1 săptămână în milisecunde
+    // private static final long ONE_WEEK = 360000; // 1 oră în milisecunde
 
     @Autowired
     public MarketsService(RestTemplate restTemplate) {
@@ -88,27 +89,27 @@ public class MarketsService {
     // **********************************
 
     // Obține datele pentru un simbol de stock
-    public String fetchStockChartData(String symbol) throws IOException {
+    public String fetchStockChartData(String symbol, String range, String interval) throws IOException {
         String filePath = STOCKS_DIRECTORY + "/" + symbol + ".json";
-
+    
         // Verifică dacă fișierul există și este actualizat
         if (isFileUpToDate(filePath)) {
             return readFromFile(filePath); // Citește din fișier
         }
-
+    
         // Dacă fișierul nu este actualizat, face request către API
-        String url = "https://yahoo-finance166.p.rapidapi.com/api/stock/get-chart?region=US&range=1d&symbol=" + symbol + "&interval=1m";
-
+        String url = "https://yahoo-finance166.p.rapidapi.com/api/stock/get-chart?region=US&range=" + range + "&symbol=" + symbol + "&interval=" + interval;
+    
         HttpHeaders headers = new HttpHeaders();
         headers.set("x-rapidapi-key", apiKey);
         headers.set("x-rapidapi-host", "yahoo-finance166.p.rapidapi.com");
-
+    
         HttpEntity<String> entity = new HttpEntity<>(headers);
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
-
+    
         // Scrie datele în fișier
         writeToFile(filePath, response.getBody());
-
+    
         return response.getBody();
     }
 
