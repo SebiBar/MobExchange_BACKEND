@@ -1,3 +1,5 @@
+
+
 package mobex.Markets;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,9 +26,9 @@ public class MarketsService {
     @Value("${rapidapi.key}")
     private String apiKey; // API key din application.properties
 
-    private static final String STOCKS_DIRECTORY = "stocks_directory";
-    private static final long ONE_WEEK = 604800000; // 1 săptămână în milisecunde
-    // private static final long ONE_WEEK = 360000; // 1 oră în milisecunde
+    private static final String STOCKS_DIRECTORY = "historical_data_for_assets";
+    private static final long ONE_MONTH = 2592000000L; // 1 lună în milisecunde
+    // private static final long ONE_WEEK = 604800000; // 1 săptămână în milisecunde
 
     @Autowired
     public MarketsService(RestTemplate restTemplate) {
@@ -34,17 +36,9 @@ public class MarketsService {
         createStocksDirectory(); // Asigură-te că directorul există la inițializare
     }
 
-     // Creează directorul stocks_directory dacă nu există
-    private void createStocksDirectory() {
-        File directory = new File(STOCKS_DIRECTORY);
-        if (!directory.exists()) {
-            directory.mkdir();
-        }
-    }
-
     // ***********************
-    //  WORLD INDICES
-    // ************************
+//     //  WORLD INDICES
+//     // ************************
 
     public String fetchWorldIndices() throws IOException {
         // Verifică dacă fișierul este actualizat
@@ -72,7 +66,7 @@ public class MarketsService {
     private boolean isFileUpToDate() {
         Path path = Paths.get("world_indices.json");
         try {
-            return Files.exists(path) && Files.getLastModifiedTime(path).toMillis() > System.currentTimeMillis() - 604800000; // 1 săptămână
+            return Files.exists(path) && Files.getLastModifiedTime(path).toMillis() > System.currentTimeMillis() - ONE_MONTH; // 1 săptămână
         } catch (IOException e) {            // În cazul în care apare o eroare la citirea fișierului, considerăm că fișierul nu este actualizat
             return false;
         }
@@ -85,130 +79,92 @@ public class MarketsService {
     }
 
     // **********************************
-    //  STOCKS SIMBOL REQUESTS
-    // **********************************
+//     //  STOCKS SIMBOL REQUESTS
+//     // **********************************
 
-    // Obține datele pentru un simbol de stock
-    public String fetchStockChartData(String symbol, String range, String interval) throws IOException {
-        String filePath = STOCKS_DIRECTORY + "/" + symbol + ".json";
-    
-        // Verifică dacă fișierul există și este actualizat
-        if (isFileUpToDate(filePath)) {
-            return readFromFile(filePath); // Citește din fișier
+    private void createStocksDirectory() {
+        File directory = new File(STOCKS_DIRECTORY);
+        if (!directory.exists()) {
+            directory.mkdir();
         }
-    
-        // Dacă fișierul nu este actualizat, face request către API
+
+        String[] subdirectories = {"1D", "5D", "1M", "3M", "6M", "1Y", "5Y", "ALL"};
+        for (String subdirectory : subdirectories) {
+            File subdirectoryFile = new File(STOCKS_DIRECTORY + "/" + subdirectory);
+            if (!subdirectoryFile.exists()) {
+                subdirectoryFile.mkdir();
+            }
+        }
+    }
+
+    private String readOrCreateFile(String symbol, String range, String interval) {
+        String subdirectory = getSubdirectory(range);
+        String filename = symbol + "_" + subdirectory + ".json";
+        String filepath = STOCKS_DIRECTORY + "/" + subdirectory + "/" + filename;
+
+        File file = new File(filepath);
+        if (file.exists() && file.isFile()) {
+            try {
+                return new String(Files.readAllBytes(Paths.get(filepath)));
+            } catch (IOException e) {
+                // Dacă fișierul este corupt, facem un request la API
+                return fetchStockChartDataFromAPI(symbol, range, interval);
+            }
+        } else {
+            // Dacă fișierul nu există, facem un request la API
+            return fetchStockChartDataFromAPI(symbol, range, interval);
+        }
+    }
+
+    private String fetchStockChartDataFromAPI(String symbol, String range, String interval) {
+        // Codul pentru a face un request la API și a scrie datele în fișier
         String url = "https://yahoo-finance166.p.rapidapi.com/api/stock/get-chart?region=US&range=" + range + "&symbol=" + symbol + "&interval=" + interval;
-    
+
         HttpHeaders headers = new HttpHeaders();
         headers.set("x-rapidapi-key", apiKey);
         headers.set("x-rapidapi-host", "yahoo-finance166.p.rapidapi.com");
-    
+
         HttpEntity<String> entity = new HttpEntity<>(headers);
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
-    
-        // Scrie datele în fișier
-        writeToFile(filePath, response.getBody());
-    
+
+        String filepath = STOCKS_DIRECTORY + "/" + getSubdirectory(range) + "/" + symbol + "_" + getSubdirectory(range) + ".json";
+        writeToFile(filepath, response.getBody());
+
         return response.getBody();
     }
 
-    // Verifică dacă fișierul este actualizat
-    private boolean isFileUpToDate(String filePath) {
-        Path path = Paths.get(filePath);
-        try {
-            return Files.exists(path) && Files.getLastModifiedTime(path).toMillis() > System.currentTimeMillis() - ONE_WEEK;
-        } catch (IOException e) {
-            return false; // Dacă apare o eroare, consideră că fișierul nu este actualizat
-        }
-    }
-
-    // Citește datele din fișier
-    private String readFromFile(String filePath) throws IOException {
-        Path path = Paths.get(filePath);
-        return new String(Files.readAllBytes(path));
-    }
-
-    // Scrie datele în fișier
-    private void writeToFile(String filePath, String data) throws IOException {
-        try (FileWriter fileWriter = new FileWriter(filePath)) {
+    private void writeToFile(String filepath, String data) {
+        try (FileWriter fileWriter = new FileWriter(filepath)) {
             fileWriter.write(data);
+        } catch (IOException e) {
+            // Gestionăm eroarea
         }
     }
 
+    private String getSubdirectory(String range) {
+        switch (range) {
+            case "1d":
+                return "1D";
+            case "5d":
+                return "5D";
+            case "20d":
+                return "1M";
+            case "60d":
+                return "3M";
+            case "120d":
+                return "6M";
+            case "240d":
+                return "1Y";
+            case "1200d":
+                return "5Y";
+            case "max":
+                return "ALL";
+            default:
+                return "1D";
+        }
+    }
+
+    public String fetchStockChartData(String symbol, String range, String interval) throws IOException {
+        return readOrCreateFile(symbol, range, interval);
+    }
 }
-           
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// CODUL DE MAI JOS DOAR CITESTE DIN FISIERUL world_indices.json SI IL RETURNEAZA
-
-// package mobex.Markets;
-
-// import org.springframework.stereotype.Service;
-
-// import java.io.IOException;
-// import java.nio.file.Files;
-// import java.nio.file.Path;
-// import java.nio.file.Paths;
-
-// @Service
-// public class MarketsService {
-
-//     // Metoda pentru a obține datele din fișierul world_indices.json
-//     public String getWorldIndicesFromFile() throws IOException {
-//         // Citește conținutul fișierului world_indices.json
-//         Path path = Paths.get("world_indices.json");
-//         if (!Files.exists(path)) {
-//             throw new IOException("Fișierul world_indices.json nu a fost găsit.");
-//         }
-//         return new String(Files.readAllBytes(path));
-//     }
-// }
