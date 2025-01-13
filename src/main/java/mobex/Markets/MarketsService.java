@@ -28,7 +28,7 @@ public class MarketsService {
 
     private static final String STOCKS_DIRECTORY = "historical_data_for_assets";
     private static final long ONE_MONTH = 2592000000L; // 1 lună în milisecunde
-    // private static final long ONE_WEEK = 604800000; // 1 săptămână în milisecunde
+   
 
     @Autowired
     public MarketsService(RestTemplate restTemplate) {
@@ -66,7 +66,7 @@ public class MarketsService {
     private boolean isFileUpToDate() {
         Path path = Paths.get("world_indices.json");
         try {
-            return Files.exists(path) && Files.getLastModifiedTime(path).toMillis() > System.currentTimeMillis() - ONE_MONTH; // 1 săptămână
+            return Files.exists(path) && Files.getLastModifiedTime(path).toMillis() > System.currentTimeMillis() - ONE_MONTH; // 1 luna
         } catch (IOException e) {            // În cazul în care apare o eroare la citirea fișierului, considerăm că fișierul nu este actualizat
             return false;
         }
@@ -79,8 +79,8 @@ public class MarketsService {
     }
 
     // **********************************
-//     //  STOCKS SIMBOL REQUESTS
-//     // **********************************
+    //  STOCKS SIMBOL REQUESTS
+    // **********************************
 
     private void createStocksDirectory() {
         File directory = new File(STOCKS_DIRECTORY);
