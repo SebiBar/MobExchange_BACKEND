@@ -37,11 +37,12 @@ public class MarketsService {
     }
 
     // ***********************
-//     //  WORLD INDICES
-//     // ************************
+    //  WORLD INDICES
+    // ************************
 
     public String fetchWorldIndices() throws IOException {
         // Verifică dacă fișierul este actualizat
+        // fisierul contine un array cu 40 de obiecte, iar fiecare obiect contine date generale despre un asset, NU CONTINE DATE ISTORICE necesare pentru a crea un grafic !!
         if (isFileUpToDate()) {
             // Citește și returnează conținutul fișierului
             return new String(Files.readAllBytes(Paths.get("world_indices.json")));
@@ -88,7 +89,8 @@ public class MarketsService {
             directory.mkdir();
         }
 
-        String[] subdirectories = {"1D", "5D", "1M", "3M", "6M", "1Y", "5Y", "ALL"};
+        // String[] subdirectories = {"1D", "5D", "1M", "3M", "6M", "1Y", "5Y", "ALL"};
+        String[] subdirectories = {"1D", "5D", "1M", "6M", "YTD", "1Y", "5Y", "ALL"};
         for (String subdirectory : subdirectories) {
             File subdirectoryFile = new File(STOCKS_DIRECTORY + "/" + subdirectory);
             if (!subdirectoryFile.exists()) {
@@ -147,15 +149,15 @@ public class MarketsService {
                 return "1D";
             case "5d":
                 return "5D";
-            case "20d":
+            case "1mo":
                 return "1M";
-            case "60d":
-                return "3M";
-            case "120d":
+            case "6mo":
                 return "6M";
-            case "240d":
+            case "ytd":
+                return "YTD";
+            case "1y":
                 return "1Y";
-            case "1200d":
+            case "5y":
                 return "5Y";
             case "max":
                 return "ALL";
