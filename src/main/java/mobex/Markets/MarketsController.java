@@ -28,6 +28,7 @@ public class MarketsController {
                description = "Retrieves the latest data for various world indices from the local file.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved world indices data."),
+            @ApiResponse(responseCode = "429", description = "You have exceeded the MONTHLY quota for Requests on your current plan, BASIC. Upgrade your plan for more requests."),
             @ApiResponse(responseCode = "500", description = "Internal server error.")
     })
     @GetMapping("/world-indices")
@@ -46,6 +47,7 @@ public class MarketsController {
                description = "Retrieves the latest data for various futures from the local file.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved futures data."),
+            @ApiResponse(responseCode = "429", description = "You have exceeded the MONTHLY quota for Requests on your current plan, BASIC. Upgrade your plan for more requests."),
             @ApiResponse(responseCode = "500", description = "Internal server error.")
     })
     @GetMapping("/commodities")
@@ -57,7 +59,7 @@ public class MarketsController {
             return ResponseEntity.status(500).body("Error writing to file: " + e.getMessage());
         }
     }
-    
+
 
     // **********************************
     //  STOCKS SIMBOL REQUESTS
@@ -68,6 +70,7 @@ public class MarketsController {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved stock chart data."),
             @ApiResponse(responseCode = "401", description = "Invalid API key."),
             @ApiResponse(responseCode = "403", description = "You are not subscribed to this API."),
+            @ApiResponse(responseCode = "429", description = "You have exceeded the MONTHLY quota for Requests on your current plan, BASIC. Upgrade your plan for more requests."),
             @ApiResponse(responseCode = "500", description = "Internal server error.")
     })
     @GetMapping("/stock-chart")
