@@ -58,6 +58,9 @@ public class MarketsService {
         HttpEntity<String> entity = new HttpEntity<>(headers);
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
 
+        // In urma unui singur request, cel de mai sus, se obtin date generale despre toate asseturile din URL, date necesare pentru a crea tabelul de pe FE
+        // Pentru a crea graficul cu evolutia pretului, e nevoie de alt request pentru date istorice.
+
         // Scrierea răspunsului în fișier
         writeResponseToFile(response.getBody());
 
@@ -78,6 +81,55 @@ public class MarketsService {
             fileWriter.write(response);
         }
     }
+
+
+    // ***********************
+    //  Futures
+    // ************************
+
+    public String fetchFutures() throws IOException {
+        // Verifică dacă fișierul este actualizat
+        // fisierul contine un array cu 40 de obiecte, iar fiecare obiect contine date generale despre un asset, NU CONTINE DATE ISTORICE necesare pentru a crea un grafic !!
+        if (isFileUpToDate1()) {
+            // Citește și returnează conținutul fișierului
+            return new String(Files.readAllBytes(Paths.get("futures.json")));
+        }
+
+        // URL-ul API-ului
+        String url = "https://yahoo-finance166.p.rapidapi.com/api/market/get-quote?symbols=ES%3DF%2CYM%3DF%2CNQ%3DF%2CRTY%3DF%2CZB%3DF%2CZN%3DF%2CZF%3DF%2CZT%3DF%2CGC%3DF%2CMGC%3DF%2CSI%3DF%2CSIL%3DF%2CPL%3DF%2CHG%3DF%2CPA%3DF%2CCL%3DF%2CHO%3DF%2CNG%3DF%2CRB%3DF%2CBZ%3DF%2CB0%3DF%2CZC%3DF%2CZO%3DF%2CKE%3DF%2CZR%3DF%2CZM%3DF%2CZL%3DF%2CZS%3DF%2CGF%3DF%2CHE%3DF%2CLE%3DF%2CCC%3DF%2CKC%3DF%2CCT%3DF%2CLBS%3DF%2COJ%3DF%2CSB%3DF";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("x-rapidapi-key", apiKey); 
+        headers.set("x-rapidapi-host", "yahoo-finance166.p.rapidapi.com");
+
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+
+        // In urma unui singur request, cel de mai sus, se obtin date generale despre toate asseturile din URL, date necesare pentru a crea tabelul de pe FE
+        // Pentru a crea graficul cu evolutia pretului, e nevoie de alt request pentru date istorice.
+
+        // Scrierea răspunsului în fișier
+        writeResponseToFile1(response.getBody());
+
+        return response.getBody();
+    }
+
+    private boolean isFileUpToDate1() {
+        Path path = Paths.get("futures.json");
+        try {
+            return Files.exists(path) && Files.getLastModifiedTime(path).toMillis() > System.currentTimeMillis() - ONE_MONTH; // 1 luna
+        } catch (IOException e) {            // În cazul în care apare o eroare la citirea fișierului, considerăm că fișierul nu este actualizat
+            return false;
+        }
+    }
+
+    private void writeResponseToFile1(String response) throws IOException {
+        try (FileWriter fileWriter = new FileWriter("futures.json")) {
+            fileWriter.write(response);
+        }
+    }
+
+
 
     // **********************************
     //  STOCKS SIMBOL REQUESTS

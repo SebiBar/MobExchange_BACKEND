@@ -40,6 +40,25 @@ public class MarketsController {
         }
     }
 
+
+
+    @Operation(summary = "Get Futures",
+               description = "Retrieves the latest data for various futures from the local file.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved futures data."),
+            @ApiResponse(responseCode = "500", description = "Internal server error.")
+    })
+    @GetMapping("/commodities")
+    public ResponseEntity<String> getFutures() {
+        try {
+            String response = marketsService.fetchFutures();
+            return ResponseEntity.ok(response);
+        } catch (IOException e) {
+            return ResponseEntity.status(500).body("Error writing to file: " + e.getMessage());
+        }
+    }
+    
+
     // **********************************
     //  STOCKS SIMBOL REQUESTS
     // **********************************
