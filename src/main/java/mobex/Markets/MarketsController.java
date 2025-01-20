@@ -29,22 +29,7 @@ public class MarketsController {
         this.authService = authService;
     }
 
-    // @Operation(summary = "Get World Indices",
-    //            description = "Retrieves the latest data for various world indices from the local file.")
-    // @ApiResponses(value = {
-    //         @ApiResponse(responseCode = "200", description = "Successfully retrieved world indices data."),
-    //         @ApiResponse(responseCode = "429", description = "You have exceeded the MONTHLY quota for Requests on your current plan, BASIC. Upgrade your plan for more requests."),
-    //         @ApiResponse(responseCode = "500", description = "Internal server error.")
-    // })
-    // @GetMapping("/world-indices")
-    // public ResponseEntity<String> getWorldIndices() {
-    //     try {
-    //         String response = marketsService.fetchWorldIndices();
-    //         return ResponseEntity.ok(response);
-    //     } catch (IOException e) {
-    //         return ResponseEntity.status(500).body("Error writing to file: " + e.getMessage());
-    //     }
-    // }
+    
 
     @Operation(summary = "Get World Indices",  
             description = "Retrieves the latest data for various world indices from the local file.",  
@@ -76,22 +61,7 @@ public class MarketsController {
 
 
 
-    // @Operation(summary = "Get Futures",
-    //            description = "Retrieves the latest data for various futures from the local file.")
-    // @ApiResponses(value = {
-    //         @ApiResponse(responseCode = "200", description = "Successfully retrieved futures data."),
-    //         @ApiResponse(responseCode = "429", description = "You have exceeded the MONTHLY quota for Requests on your current plan, BASIC. Upgrade your plan for more requests."),
-    //         @ApiResponse(responseCode = "500", description = "Internal server error.")
-    // })
-    // @GetMapping("/commodities")
-    // public ResponseEntity<String> getFutures() {
-    //     try {
-    //         String response = marketsService.fetchFutures();
-    //         return ResponseEntity.ok(response);
-    //     } catch (IOException e) {
-    //         return ResponseEntity.status(500).body("Error writing to file: " + e.getMessage());
-    //     }
-    // }
+   
 
     @Operation(summary = "Get Futures",  
             description = "Retrieves the latest data for various futures from the local file.",  
@@ -122,31 +92,6 @@ public class MarketsController {
     }
 
 
-    // **********************************
-    //  STOCKS SIMBOL REQUESTS
-    // **********************************
-    // @Operation(summary = "Get Stock Chart Data",
-    //        description = "Retrieves the latest chart data for a specific stock symbol.")
-    // @ApiResponses(value = {
-    //         @ApiResponse(responseCode = "200", description = "Successfully retrieved stock chart data."),
-    //         @ApiResponse(responseCode = "401", description = "Invalid API key."),
-    //         @ApiResponse(responseCode = "403", description = "You are not subscribed to this API."),
-    //         @ApiResponse(responseCode = "429", description = "You have exceeded the MONTHLY quota for Requests on your current plan, BASIC. Upgrade your plan for more requests."),
-    //         @ApiResponse(responseCode = "500", description = "Internal server error.")
-    // })
-    // @GetMapping("/stock-chart")
-    // public ResponseEntity<String> getStockChartData(
-    //         @RequestParam String symbol,
-    //         @RequestParam String range,
-    //         @RequestParam String interval
-    //     ) {
-    //     try {
-    //         String response = marketsService.fetchStockChartData(symbol, range, interval);
-    //         return ResponseEntity.ok(response);
-    //     } catch (IOException e) {
-    //         return ResponseEntity.status(500).body("Error fetching stock chart data: " + e.getMessage());
-    //     }
-    // }
 
     @Operation(summary = "Get Stock Chart Data",  
             description = "Retrieves the latest chart data (hystorical data) for a specific stock symbol.",  
