@@ -182,6 +182,54 @@ public class MarketsService {
 
 
 
+    // ***********************
+    //  Currencies
+    // ************************
+
+    public String fetchCurrencies() throws IOException {
+        // Verifică dacă fișierul este actualizat
+        // fisierul contine un array cu 40 de obiecte, iar fiecare obiect contine date generale despre un asset, NU CONTINE DATE ISTORICE necesare pentru a crea un grafic !!
+        if (isFileUpToDate3()) {
+            // Citește și returnează conținutul fișierului
+            return new String(Files.readAllBytes(Paths.get("currencies.json")));
+        }
+
+        // URL-ul API-ului
+        String url = "https://yahoo-finance166.p.rapidapi.com/api/market/get-quote?symbols=EURUSD%3DX%2CJPY%3DX%2CGBPUSD%3DX%2CAUDUSD%3DX%2CNZDUSD%3DX%2CEURJPY%3DX%2CGBPJPY%3DX%2CEURGBP%3DX%2CEURCAD%3DX%2CEURSEK%3DX%2CEURCHF%3DX%2CEURHUF%3DX%2CCNY%3DX%2CHKD%3DX%2C SGD%3DX%2CINR%3DX%2CMXN%3DX%2CPHP%3DX%2CIDR%3DX%2CTHB%3DX%2CMYR%3DX%2CZAR%3DX%2CRUB%3DX";
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("x-rapidapi-key", apiKey); 
+        headers.set("x-rapidapi-host", "yahoo-finance166.p.rapidapi.com");
+
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+
+        // In urma unui singur request, cel de mai sus, se obtin date generale despre toate asseturile din URL, date necesare pentru a crea tabelul de pe FE
+        // Pentru a crea graficul cu evolutia pretului, e nevoie de alt request pentru date istorice.
+
+        // Scrierea răspunsului în fișier
+        writeResponseToFile3(response.getBody());
+
+        return response.getBody();
+    }
+
+    private boolean isFileUpToDate3() {
+        Path path = Paths.get("currencies.json");
+        try {
+            return Files.exists(path) && Files.getLastModifiedTime(path).toMillis() > System.currentTimeMillis() - ONE_MONTH; // 1 luna
+        } catch (IOException e) {            // În cazul în care apare o eroare la citirea fișierului, considerăm că fișierul nu este actualizat
+            return false;
+        }
+    }
+
+    private void writeResponseToFile3(String response) throws IOException {
+        try (FileWriter fileWriter = new FileWriter("currencies.json")) {
+            fileWriter.write(response);
+        }
+    }
+
+
+
+
 
 
     // **********************************

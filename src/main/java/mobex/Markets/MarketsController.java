@@ -124,6 +124,76 @@ public class MarketsController {
 
 
 
+
+
+
+    @Operation(summary = "Get Currencies",  
+            description = "Retrieves the latest data for various Currencies from the local file.",  
+            responses = {  
+                    @ApiResponse(responseCode = "200", description = "Successfully retrieved Currencies data."),  
+                    @ApiResponse(responseCode = "401", description = "Expired token"),  
+                    @ApiResponse(responseCode = "400", description = "Invalid Token"),  
+                    @ApiResponse(responseCode = "429", description = "You have exceeded the MONTHLY quota for Requests on your current plan, BASIC. Upgrade your plan for more requests."),  
+                    @ApiResponse(responseCode = "500", description = "Internal server error.")  
+            })  
+    @GetMapping("/currencies")  
+    public ResponseEntity<String> getCurrencies(  
+            @RequestHeader("Authorization") String accessToken) {  
+        try {  
+            // Verificăm validitatea token-ului  
+            authService.getValidTokenByAccessToken(accessToken);  
+            
+            // Obținem datele despre bonds  
+            String response = marketsService.fetchCurrencies();  
+            return ResponseEntity.ok(response);  
+        } catch (NotActiveException e) {  
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Token expired");  
+        } catch (IOException e) {  
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error writing to file: " + e.getMessage());  
+        } catch (Exception e) {  
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());  
+        }  
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     @Operation(summary = "Get Stock Chart Data",  
             description = "Retrieves the latest chart data (hystorical data) for a specific stock symbol.",  
             responses = {  
