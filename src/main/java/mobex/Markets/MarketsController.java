@@ -160,40 +160,6 @@ public class MarketsController {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     @Operation(summary = "Get Stock Chart Data",  
             description = "Retrieves the latest chart data (hystorical data) for a specific stock symbol.",  
             responses = {  
