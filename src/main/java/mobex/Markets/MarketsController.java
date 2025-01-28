@@ -61,8 +61,6 @@ public class MarketsController {
 
 
 
-   
-
     @Operation(summary = "Get Futures",  
             description = "Retrieves the latest data for various futures from the local file.",  
             responses = {  
@@ -90,6 +88,39 @@ public class MarketsController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());  
         }  
     }
+
+
+
+
+    @Operation(summary = "Get Bonds",  
+            description = "Retrieves the latest data for various bonds from the local file.",  
+            responses = {  
+                    @ApiResponse(responseCode = "200", description = "Successfully retrieved bonds data."),  
+                    @ApiResponse(responseCode = "401", description = "Expired token"),  
+                    @ApiResponse(responseCode = "400", description = "Invalid Token"),  
+                    @ApiResponse(responseCode = "429", description = "You have exceeded the MONTHLY quota for Requests on your current plan, BASIC. Upgrade your plan for more requests."),  
+                    @ApiResponse(responseCode = "500", description = "Internal server error.")  
+            })  
+    @GetMapping("/bonds")  
+    public ResponseEntity<String> getBonds(  
+            @RequestHeader("Authorization") String accessToken) {  
+        try {  
+            // Verificăm validitatea token-ului  
+            authService.getValidTokenByAccessToken(accessToken);  
+            
+            // Obținem datele despre bonds  
+            String response = marketsService.fetchBonds();  
+            return ResponseEntity.ok(response);  
+        } catch (NotActiveException e) {  
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Token expired");  
+        } catch (IOException e) {  
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error writing to file: " + e.getMessage());  
+        } catch (Exception e) {  
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());  
+        }  
+    }
+
+
 
 
 

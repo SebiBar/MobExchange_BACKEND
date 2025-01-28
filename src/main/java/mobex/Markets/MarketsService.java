@@ -131,6 +131,59 @@ public class MarketsService {
 
 
 
+
+    // ***********************
+    //  Bonds
+    // ************************
+
+    public String fetchBonds() throws IOException {
+        // Verifică dacă fișierul este actualizat
+        // fisierul contine un array cu 40 de obiecte, iar fiecare obiect contine date generale despre un asset, NU CONTINE DATE ISTORICE necesare pentru a crea un grafic !!
+        if (isFileUpToDate2()) {
+            // Citește și returnează conținutul fișierului
+            return new String(Files.readAllBytes(Paths.get("bonds.json")));
+        }
+
+        // URL-ul API-ului
+        String url = "https://yahoo-finance166.p.rapidapi.com/api/market/get-quote?symbols=%5EIRX%2C%5EFVX%2C%5ETNX%2C%5ETYX%2C2YY%3DF%2CZN%3DF";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("x-rapidapi-key", apiKey); 
+        headers.set("x-rapidapi-host", "yahoo-finance166.p.rapidapi.com");
+
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+
+        // In urma unui singur request, cel de mai sus, se obtin date generale despre toate asseturile din URL, date necesare pentru a crea tabelul de pe FE
+        // Pentru a crea graficul cu evolutia pretului, e nevoie de alt request pentru date istorice.
+
+        // Scrierea răspunsului în fișier
+        writeResponseToFile2(response.getBody());
+
+        return response.getBody();
+    }
+
+    private boolean isFileUpToDate2() {
+        Path path = Paths.get("bonds.json");
+        try {
+            return Files.exists(path) && Files.getLastModifiedTime(path).toMillis() > System.currentTimeMillis() - ONE_MONTH; // 1 luna
+        } catch (IOException e) {            // În cazul în care apare o eroare la citirea fișierului, considerăm că fișierul nu este actualizat
+            return false;
+        }
+    }
+
+    private void writeResponseToFile2(String response) throws IOException {
+        try (FileWriter fileWriter = new FileWriter("bonds.json")) {
+            fileWriter.write(response);
+        }
+    }
+
+
+
+
+
+
+
     // **********************************
     //  STOCKS SIMBOL REQUESTS
     // **********************************
