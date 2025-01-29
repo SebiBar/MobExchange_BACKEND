@@ -36,195 +36,43 @@ public class MarketsService {
         createStocksDirectory(); // Asigură-te că directorul există la inițializare
     }
 
-    // ***********************
-    //  WORLD INDICES
-    // ************************
+    
 
-    public String fetchWorldIndices() throws IOException {
-        // Verifică dacă fișierul este actualizat
-        // fisierul contine un array cu 40 de obiecte, iar fiecare obiect contine date generale despre un asset, NU CONTINE DATE ISTORICE necesare pentru a crea un grafic !!
-        if (isFileUpToDate()) {
-            // Citește și returnează conținutul fișierului
-            return new String(Files.readAllBytes(Paths.get("world_indices.json")));
-        }
-
-        // URL-ul API-ului
-        String url = "https://yahoo-finance166.p.rapidapi.com/api/market/get-quote?symbols=%5EGSPC%2C%5EDJI%2C%5EIXIC%2C%5ENYA%2C%5EXAX%2C%5EBUK100P%2C%5ERUT%2C%5EVIX%2C%5EFTSE%2C%5EGDAXI%2C%5EFCHI%2C%5ESTOXX50E%2C%5EN100%2C%5EBFX%2CMOEX.ME%2CN225%2C%5EHSI%2C00001.SS%2C99001.SZ%2C%5ESTI%2C%5EAXJO%2C%5EAORD%2C%5BBSESN%2C%5EJKSE%2C%5EKLSE%2C%5ENZ50%2C%5EKS11%2C%5ETWII%2C%5EGSPTSE%2C%5EBVSP%2C%5EMXX%2C%5EIPSA%2C%5EMERV%2C%5ETA125.TA%2C%5ECASE30%2C%5EJN0U.JO%2CDX-Y.NYB%2C%5E125904-USD-STRD%2C%5EXDB%2C%5EXDE%2C000001.SS%2C%5EN225%2C%5EXDN%2C%5EXDA";
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("x-rapidapi-key", apiKey); 
-        headers.set("x-rapidapi-host", "yahoo-finance166.p.rapidapi.com");
-
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
-
-        // In urma unui singur request, cel de mai sus, se obtin date generale despre toate asseturile din URL, date necesare pentru a crea tabelul de pe FE
-        // Pentru a crea graficul cu evolutia pretului, e nevoie de alt request pentru date istorice.
-
-        // Scrierea răspunsului în fișier
-        writeResponseToFile(response.getBody());
-
-        return response.getBody();
-    }
-
-    private boolean isFileUpToDate() {
-        Path path = Paths.get("world_indices.json");
-        try {
-            return Files.exists(path) && Files.getLastModifiedTime(path).toMillis() > System.currentTimeMillis() - ONE_MONTH; // 1 luna
-        } catch (IOException e) {            // În cazul în care apare o eroare la citirea fișierului, considerăm că fișierul nu este actualizat
-            return false;
-        }
-    }
-
-    private void writeResponseToFile(String response) throws IOException {
-        try (FileWriter fileWriter = new FileWriter("world_indices.json")) {
-            fileWriter.write(response);
-        }
-    }
-
-
-    // ***********************
-    //  Futures
-    // ************************
-
-    public String fetchFutures() throws IOException {
-        // Verifică dacă fișierul este actualizat
-        // fisierul contine un array cu 40 de obiecte, iar fiecare obiect contine date generale despre un asset, NU CONTINE DATE ISTORICE necesare pentru a crea un grafic !!
-        if (isFileUpToDate1()) {
-            // Citește și returnează conținutul fișierului
-            return new String(Files.readAllBytes(Paths.get("futures.json")));
-        }
-
-        // URL-ul API-ului
-        String url = "https://yahoo-finance166.p.rapidapi.com/api/market/get-quote?symbols=ES%3DF%2CYM%3DF%2CNQ%3DF%2CRTY%3DF%2CZB%3DF%2CZN%3DF%2CZF%3DF%2CZT%3DF%2CGC%3DF%2CMGC%3DF%2CSI%3DF%2CSIL%3DF%2CPL%3DF%2CHG%3DF%2CPA%3DF%2CCL%3DF%2CHO%3DF%2CNG%3DF%2CRB%3DF%2CBZ%3DF%2CB0%3DF%2CZC%3DF%2CZO%3DF%2CKE%3DF%2CZR%3DF%2CZM%3DF%2CZL%3DF%2CZS%3DF%2CGF%3DF%2CHE%3DF%2CLE%3DF%2CCC%3DF%2CKC%3DF%2CCT%3DF%2CLBS%3DF%2COJ%3DF%2CSB%3DF";
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("x-rapidapi-key", apiKey); 
-        headers.set("x-rapidapi-host", "yahoo-finance166.p.rapidapi.com");
-
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
-
-        // In urma unui singur request, cel de mai sus, se obtin date generale despre toate asseturile din URL, date necesare pentru a crea tabelul de pe FE
-        // Pentru a crea graficul cu evolutia pretului, e nevoie de alt request pentru date istorice.
-
-        // Scrierea răspunsului în fișier
-        writeResponseToFile1(response.getBody());
-
-        return response.getBody();
-    }
-
-    private boolean isFileUpToDate1() {
-        Path path = Paths.get("futures.json");
-        try {
-            return Files.exists(path) && Files.getLastModifiedTime(path).toMillis() > System.currentTimeMillis() - ONE_MONTH; // 1 luna
-        } catch (IOException e) {            // În cazul în care apare o eroare la citirea fișierului, considerăm că fișierul nu este actualizat
-            return false;
-        }
-    }
-
-    private void writeResponseToFile1(String response) throws IOException {
-        try (FileWriter fileWriter = new FileWriter("futures.json")) {
-            fileWriter.write(response);
-        }
-    }
-
-
-
-
-    // ***********************
-    //  Bonds
-    // ************************
-
-    public String fetchBonds() throws IOException {
-        // Verifică dacă fișierul este actualizat
-        // fisierul contine un array cu 40 de obiecte, iar fiecare obiect contine date generale despre un asset, NU CONTINE DATE ISTORICE necesare pentru a crea un grafic !!
-        if (isFileUpToDate2()) {
-            // Citește și returnează conținutul fișierului
-            return new String(Files.readAllBytes(Paths.get("bonds.json")));
-        }
-
-        // URL-ul API-ului
-        String url = "https://yahoo-finance166.p.rapidapi.com/api/market/get-quote?symbols=%5EIRX%2C%5EFVX%2C%5ETNX%2C%5ETYX%2C2YY%3DF%2CZN%3DF";
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("x-rapidapi-key", apiKey); 
-        headers.set("x-rapidapi-host", "yahoo-finance166.p.rapidapi.com");
-
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
-
-        // In urma unui singur request, cel de mai sus, se obtin date generale despre toate asseturile din URL, date necesare pentru a crea tabelul de pe FE
-        // Pentru a crea graficul cu evolutia pretului, e nevoie de alt request pentru date istorice.
-
-        // Scrierea răspunsului în fișier
-        writeResponseToFile2(response.getBody());
-
-        return response.getBody();
-    }
-
-    private boolean isFileUpToDate2() {
-        Path path = Paths.get("bonds.json");
-        try {
-            return Files.exists(path) && Files.getLastModifiedTime(path).toMillis() > System.currentTimeMillis() - ONE_MONTH; // 1 luna
-        } catch (IOException e) {            // În cazul în care apare o eroare la citirea fișierului, considerăm că fișierul nu este actualizat
-            return false;
-        }
-    }
-
-    private void writeResponseToFile2(String response) throws IOException {
-        try (FileWriter fileWriter = new FileWriter("bonds.json")) {
-            fileWriter.write(response);
-        }
-    }
-
-
-
-
-
-    // ***********************
-    //  Currencies
-    // ************************
-
-    public String fetchCurrencies() throws IOException {
-        // Verifică dacă fișierul este actualizat
-        // fisierul contine un array cu 40 de obiecte, iar fiecare obiect contine date generale despre un asset, NU CONTINE DATE ISTORICE necesare pentru a crea un grafic !!
-        if (isFileUpToDate3()) {
-            // Citește și returnează conținutul fișierului
-            return new String(Files.readAllBytes(Paths.get("currencies.json")));
-        }
-
-        // URL-ul API-ului
-        String url = "https://yahoo-finance166.p.rapidapi.com/api/market/get-quote?symbols=EURUSD%3DX%2CJPY%3DX%2CGBPUSD%3DX%2CAUDUSD%3DX%2CNZDUSD%3DX%2CEURJPY%3DX%2CGBPJPY%3DX%2CEURGBP%3DX%2CEURCAD%3DX%2CEURSEK%3DX%2CEURCHF%3DX%2CEURHUF%3DX%2CCNY%3DX%2CHKD%3DX%2C SGD%3DX%2CINR%3DX%2CMXN%3DX%2CPHP%3DX%2CIDR%3DX%2CTHB%3DX%2CMYR%3DX%2CZAR%3DX%2CRUB%3DX";
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("x-rapidapi-key", apiKey); 
-        headers.set("x-rapidapi-host", "yahoo-finance166.p.rapidapi.com");
-
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
-
-        // In urma unui singur request, cel de mai sus, se obtin date generale despre toate asseturile din URL, date necesare pentru a crea tabelul de pe FE
-        // Pentru a crea graficul cu evolutia pretului, e nevoie de alt request pentru date istorice.
-
-        // Scrierea răspunsului în fișier
-        writeResponseToFile3(response.getBody());
-
-        return response.getBody();
-    }
-
-    private boolean isFileUpToDate3() {
-        Path path = Paths.get("currencies.json");
-        try {
-            return Files.exists(path) && Files.getLastModifiedTime(path).toMillis() > System.currentTimeMillis() - ONE_MONTH; // 1 luna
-        } catch (IOException e) {            // În cazul în care apare o eroare la citirea fișierului, considerăm că fișierul nu este actualizat
-            return false;
-        }
-    }
-
-    private void writeResponseToFile3(String response) throws IOException {
-        try (FileWriter fileWriter = new FileWriter("currencies.json")) {
-            fileWriter.write(response);
-        }
+    
+    public String fetchData(String fileName, String url) throws IOException {  
+        // Verifică dacă fișierul este actualizat  
+        if (isFileUpToDate(fileName)) {  
+            // Citește și returnează conținutul fișierului  
+            return new String(Files.readAllBytes(Paths.get(fileName)));  
+        }  
+    
+        HttpHeaders headers = new HttpHeaders();  
+        headers.set("x-rapidapi-key", apiKey);   
+        headers.set("x-rapidapi-host", "yahoo-finance166.p.rapidapi.com");  
+    
+        HttpEntity<String> entity = new HttpEntity<>(headers);  
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);  
+    
+        // Scrierea răspunsului în fișier  
+        writeResponseToFile(response.getBody(), fileName);  
+    
+        return response.getBody();  
+    }  
+    
+    private boolean isFileUpToDate(String fileName) {  
+        Path path = Paths.get(fileName);  
+        try {  
+            return Files.exists(path) && Files.getLastModifiedTime(path).toMillis() > System.currentTimeMillis() - ONE_MONTH; // 1 luna  
+        } catch (IOException e) {  
+            // În cazul în care apare o eroare la citirea fișierului, considerăm că fișierul nu este actualizat  
+            return false;  
+        }  
+    }  
+    
+    private void writeResponseToFile(String response, String fileName) throws IOException {  
+        try (FileWriter fileWriter = new FileWriter(fileName)) {  
+            fileWriter.write(response);  
+        }  
     }
 
 
