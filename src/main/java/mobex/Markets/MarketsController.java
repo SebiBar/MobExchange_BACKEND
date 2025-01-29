@@ -245,6 +245,25 @@ public class MarketsController {
         }  
     }
 
+    @GetMapping("/options/highest-open-interest")  
+    public ResponseEntity<String> getOptionsHighestOpenInterest(  
+            @RequestHeader("Authorization") String accessToken) {  
+        try {  
+            // Verificăm validitatea token-ului  
+            authService.getValidTokenByAccessToken(accessToken);  
+            
+            // Obținem datele despre Options  
+            String response = marketsService.fetchData("options_highest_open_interest.json", "https://yahoo-finance166.p.rapidapi.com/api/market/get-highest-open-interest?count=25&language=en-US&region=US&quote_type=OPTIONS&offset=0");  
+            return ResponseEntity.ok(response);  
+        } catch (NotActiveException e) {  
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Token expired");  
+        } catch (IOException e) {  
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error writing to file: " + e.getMessage());  
+        } catch (Exception e) {  
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());  
+        }  
+    }
+
 
 
 
