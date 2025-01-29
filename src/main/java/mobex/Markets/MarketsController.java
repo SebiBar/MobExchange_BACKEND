@@ -207,6 +207,25 @@ public class MarketsController {
         }  
     }
 
+    @GetMapping("/options/losers")  
+    public ResponseEntity<String> getOptionsLosers(  
+            @RequestHeader("Authorization") String accessToken) {  
+        try {  
+            // Verificăm validitatea token-ului  
+            authService.getValidTokenByAccessToken(accessToken);  
+            
+            // Obținem datele despre Options  
+            String response = marketsService.fetchData("options_losers.json", "https://yahoo-finance166.p.rapidapi.com/api/market/get-day-losers?offset=0&language=en-US&region=US&count=25&quote_type=OPTIONS");  
+            return ResponseEntity.ok(response);  
+        } catch (NotActiveException e) {  
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Token expired");  
+        } catch (IOException e) {  
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error writing to file: " + e.getMessage());  
+        } catch (Exception e) {  
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());  
+        }  
+    }
+
 
 
 
