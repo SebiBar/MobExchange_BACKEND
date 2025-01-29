@@ -226,6 +226,25 @@ public class MarketsController {
         }  
     }
 
+    @GetMapping("/options/highest-implied-volatility")  
+    public ResponseEntity<String> getOptionsHighestImpliedVolatility(  
+            @RequestHeader("Authorization") String accessToken) {  
+        try {  
+            // Verificăm validitatea token-ului  
+            authService.getValidTokenByAccessToken(accessToken);  
+            
+            // Obținem datele despre Options  
+            String response = marketsService.fetchData("options_highest_implied_volatility.json", "https://yahoo-finance166.p.rapidapi.com/api/market/get-highest-implied-volatility?language=en-US&region=US&offset=0&quote_type=OPTIONS&count=25");  
+            return ResponseEntity.ok(response);  
+        } catch (NotActiveException e) {  
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Token expired");  
+        } catch (IOException e) {  
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error writing to file: " + e.getMessage());  
+        } catch (Exception e) {  
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());  
+        }  
+    }
+
 
 
 
