@@ -29,6 +29,42 @@ public class MarketsController {
         this.authService = authService;
     }
 
+
+
+    @Operation(summary = "Get General Data for 1 Asset",  
+            description = "Retrieves the latest data for 1 Asset from Yahoo Finance.",  
+            responses = {  
+                    @ApiResponse(responseCode = "200", description = "Successfully retrieved data."),  
+                    @ApiResponse(responseCode = "401", description = "Expired token"),  
+                    @ApiResponse(responseCode = "400", description = "Invalid Token"),  
+                    @ApiResponse(responseCode = "429", description = "You have exceeded the MONTHLY quota for Requests."),  
+                    @ApiResponse(responseCode = "500", description = "Internal server error.")  
+            })  
+    @GetMapping("/options/get-general-data-for-1-asset")  
+    public ResponseEntity<String> getGeneralDataFor1Asset(  
+            @RequestHeader("Authorization") String accessToken,  
+            @RequestParam("symbol") String symbol) {  
+        try {  
+            // Verificăm validitatea token-ului  
+            authService.getValidTokenByAccessToken(accessToken);  
+            
+            // Construim URL-ul pentru API-ul Yahoo Finance  
+            String url = String.format("https://yahoo-finance166.p.rapidapi.com/api/market/get-quote?symbols=%s", symbol);  
+            
+            // Facem request către API-ul Yahoo Finance  
+            String response = marketsService.fetchDataFor1Asset(url);  
+            
+            return ResponseEntity.ok(response);  
+        } catch (NotActiveException e) {  
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Token expired");  
+        } catch (IOException e) {  
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error fetching data: " + e.getMessage());  
+        } catch (Exception e) {  
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());  
+        }  
+    }
+
+
     
 
     @Operation(summary = "Get World Indices",  
@@ -58,6 +94,7 @@ public class MarketsController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());  
         }  
     }
+
 
 
 
@@ -119,9 +156,6 @@ public class MarketsController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());  
         }  
     }
-
-
-
 
 
 

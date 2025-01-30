@@ -37,6 +37,17 @@ public class MarketsService {
     }
 
     
+    public String fetchDataFor1Asset(String url) throws IOException {  
+        HttpHeaders headers = new HttpHeaders();  
+        headers.set("x-rapidapi-key", apiKey);   
+        headers.set("x-rapidapi-host", "yahoo-finance166.p.rapidapi.com");  
+
+        HttpEntity<String> entity = new HttpEntity<>(headers);  
+
+        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);  
+
+        return responseEntity.getBody();  
+    } 
 
     
     public String fetchData(String fileName, String url) throws IOException {  
@@ -74,8 +85,6 @@ public class MarketsService {
             fileWriter.write(response);  
         }  
     }
-
-
 
 
 
