@@ -303,6 +303,141 @@ public class MarketsController {
 
 
 
+    // **********
+    //  STOCKS 
+    // **********
+
+    @Operation(summary = "Get Stocks",  
+            description = "Retrieves the latest data for various Stocks from the local file.",  
+            responses = {  
+                    @ApiResponse(responseCode = "200", description = "Successfully retrieved Stocks data."),  
+                    @ApiResponse(responseCode = "401", description = "Expired token"),  
+                    @ApiResponse(responseCode = "400", description = "Invalid Token"),  
+                    @ApiResponse(responseCode = "429", description = "You have exceeded the MONTHLY quota for Requests on your current plan, BASIC. Upgrade your plan for more requests."),  
+                    @ApiResponse(responseCode = "500", description = "Internal server error.")  
+            })  
+    @GetMapping("/stocks/most-active")  
+    public ResponseEntity<String> getStocks(  
+            @RequestHeader("Authorization") String accessToken) {  
+        try {  
+            // Verificăm validitatea token-ului  
+            authService.getValidTokenByAccessToken(accessToken);  
+            
+            // Obținem datele despre Options  
+            String response = marketsService.fetchData("stocks_most_active.json", "https://yahoo-finance166.p.rapidapi.com/api/market/get-most-actives?quote_type=EQUITY&offset=0&count=25&region=US&language=en-US");  
+            return ResponseEntity.ok(response);  
+        } catch (NotActiveException e) {  
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Token expired");  
+        } catch (IOException e) {  
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error writing to file: " + e.getMessage());  
+        } catch (Exception e) {  
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());  
+        }  
+    }
+
+    @GetMapping("/stocks/trending")  
+    public ResponseEntity<String> getStocksTrending(  
+            @RequestHeader("Authorization") String accessToken) {  
+        try {  
+            // Verificăm validitatea token-ului  
+            authService.getValidTokenByAccessToken(accessToken);  
+            
+            // Obținem datele despre Options  
+            String response = marketsService.fetchData("stocks_trending.json", "https://yahoo-finance166.p.rapidapi.com/api/market/get-trending?quote_type=EQUITY&offset=0&count=25&region=US&language=en-US");  
+            return ResponseEntity.ok(response);  
+        } catch (NotActiveException e) {  
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Token expired");  
+        } catch (IOException e) {  
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error writing to file: " + e.getMessage());  
+        } catch (Exception e) {  
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());  
+        }  
+    }
+
+
+    @GetMapping("/stocks/gainers")  
+    public ResponseEntity<String> getStocksGainers(  
+            @RequestHeader("Authorization") String accessToken) {  
+        try {  
+            // Verificăm validitatea token-ului  
+            authService.getValidTokenByAccessToken(accessToken);  
+            
+            // Obținem datele despre Options  
+            String response = marketsService.fetchData("stocks_gainers.json", "https://yahoo-finance166.p.rapidapi.com/api/market/get-day-gainers?offset=0&region=US&count=25&language=en-US&quote_type=EQUITY");  
+            return ResponseEntity.ok(response);  
+        } catch (NotActiveException e) {  
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Token expired");  
+        } catch (IOException e) {  
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error writing to file: " + e.getMessage());  
+        } catch (Exception e) {  
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());  
+        }  
+    }
+
+    @GetMapping("/stocks/losers")  
+    public ResponseEntity<String> getStocksLosers(  
+            @RequestHeader("Authorization") String accessToken) {  
+        try {  
+            // Verificăm validitatea token-ului  
+            authService.getValidTokenByAccessToken(accessToken);  
+            
+            // Obținem datele despre Options  
+            String response = marketsService.fetchData("stocks_losers.json", "https://yahoo-finance166.p.rapidapi.com/api/market/get-day-losers?offset=0&language=en-US&region=US&count=25&quote_type=EQUITY");  
+            return ResponseEntity.ok(response);  
+        } catch (NotActiveException e) {  
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Token expired");  
+        } catch (IOException e) {  
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error writing to file: " + e.getMessage());  
+        } catch (Exception e) {  
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());  
+        }  
+    }
+
+
+    @GetMapping("/stocks/52-wk-gainers")  
+    public ResponseEntity<String> getStocks52WeekGainers(  
+            @RequestHeader("Authorization") String accessToken) {  
+        try {  
+            // Verificăm validitatea token-ului  
+            authService.getValidTokenByAccessToken(accessToken);  
+            
+            // Obținem datele despre Options  
+            String response = marketsService.fetchData("stocks_52WkGainers.json", "https://yahoo-finance166.p.rapidapi.com/api/market/52-wk-gainers?offset=0&region=US&count=25&language=en-US&quote_type=EQUITY");  
+            return ResponseEntity.ok(response);  
+        } catch (NotActiveException e) {  
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Token expired");  
+        } catch (IOException e) {  
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error writing to file: " + e.getMessage());  
+        } catch (Exception e) {  
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());  
+        }  
+    }
+
+    @GetMapping("/stocks/52-wk-losers")  
+    public ResponseEntity<String> getStocks52WeekLosers(  
+            @RequestHeader("Authorization") String accessToken) {  
+        try {  
+            // Verificăm validitatea token-ului  
+            authService.getValidTokenByAccessToken(accessToken);  
+            
+            // Obținem datele despre Options  
+            String response = marketsService.fetchData("stocks_52WkLosers.json", "https://yahoo-finance166.p.rapidapi.com/api/market/52-wk-losers?offset=0&count=25&quote_type=EQUITY&language=en-US&region=US");  
+            return ResponseEntity.ok(response);  
+        } catch (NotActiveException e) {  
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Token expired");  
+        } catch (IOException e) {  
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error writing to file: " + e.getMessage());  
+        } catch (Exception e) {  
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());  
+        }  
+    }
+
+
+
+
+
+
+
     @Operation(summary = "Get Stock Chart Data",  
             description = "Retrieves the latest chart data (hystorical data) for a specific stock symbol.",  
             responses = {  
