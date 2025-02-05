@@ -16,6 +16,9 @@ import mobex.Token.AuthService;
 import java.io.IOException;
 import java.io.NotActiveException;
 
+import org.json.JSONArray;  
+import org.json.JSONObject;
+
 @RestController
 @RequestMapping("/markets")
 public class MarketsController {
@@ -437,6 +440,129 @@ public class MarketsController {
 
 
 
+
+    // **********
+    //  CRYPTO 
+    // **********
+
+    @Operation(summary = "Get Crypto",  
+            description = "Retrieves the latest data for various Crypto from the local file.",  
+            responses = {  
+                    @ApiResponse(responseCode = "200", description = "Successfully retrieved Crypto data."),  
+                    @ApiResponse(responseCode = "401", description = "Expired token"),  
+                    @ApiResponse(responseCode = "400", description = "Invalid Token"),  
+                    @ApiResponse(responseCode = "429", description = "You have exceeded the MONTHLY quota for Requests on your current plan, BASIC. Upgrade your plan for more requests."),  
+                    @ApiResponse(responseCode = "500", description = "Internal server error.")  
+            })  
+    @GetMapping("/crypto/most-active")  
+    public ResponseEntity<String> getCrypto(  
+            @RequestHeader("Authorization") String accessToken) {  
+        try {  
+            // Verificăm validitatea token-ului  
+            authService.getValidTokenByAccessToken(accessToken);  
+            
+            // Obținem datele despre Crypto  
+            String response = marketsService.fetchData("crypto_most_active.json", "https://yahoo-finance166.p.rapidapi.com/api/market/get-most-actives?quote_type=CRYPTOCURRENCIES&offset=0&count=25&region=US&language=en-US");  
+            return ResponseEntity.ok(response);  
+        } catch (NotActiveException e) {  
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Token expired");  
+        } catch (IOException e) {  
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error writing to file: " + e.getMessage());  
+        } catch (Exception e) {  
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());  
+        }  
+    }
+
+
+    @GetMapping("/crypto/trending")  
+    public ResponseEntity<String> getCryptoTrending(  
+            @RequestHeader("Authorization") String accessToken) {  
+        try {  
+            // Verificăm validitatea token-ului  
+            authService.getValidTokenByAccessToken(accessToken);  
+            
+            // Obținem datele despre Crypto  
+            String response = marketsService.fetchData("crypto_trending.json", "https://yahoo-finance166.p.rapidapi.com/api/market/get-trending?quote_type=CRYPTOCURRENCIES&offset=0&count=25&region=US&language=en-US");  
+            
+            // Parsează răspunsul JSON  
+            JSONObject jsonResponse = new JSONObject(response);  
+            JSONArray quotes = jsonResponse.getJSONObject("finance").getJSONArray("result").getJSONObject(0).getJSONArray("quotes");  
+            
+            // Trunchiază array-ul la primele 25 de elemente  
+            JSONArray truncatedQuotes = new JSONArray();  
+            for (int i = 0; i < Math.min(25, quotes.length()); i++) {  
+                truncatedQuotes.put(quotes.get(i));  
+            }  
+            
+            // Construiește noul răspuns JSON  
+            JSONObject truncatedResponse = new JSONObject();  
+            truncatedResponse.put("finance", new JSONObject()  
+                .put("result", new JSONArray()  
+                    .put(new JSONObject()  
+                        .put("count", truncatedQuotes.length())  
+                        .put("quotes", truncatedQuotes)  
+                    )  
+                )  
+            );  
+
+            return ResponseEntity.ok(truncatedResponse.toString());  
+        } catch (NotActiveException e) {  
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Token expired");  
+        } catch (IOException e) {  
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error writing to file: " + e.getMessage());  
+        } catch (Exception e) {  
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());  
+        }  
+    }
+
+
+    @GetMapping("/crypto/gainers")  
+    public ResponseEntity<String> getCryptoGainers(  
+            @RequestHeader("Authorization") String accessToken) {  
+        try {  
+            // Verificăm validitatea token-ului  
+            authService.getValidTokenByAccessToken(accessToken);  
+            
+            // Obținem datele despre Crypto  
+            String response = marketsService.fetchData("crypto_gainers.json", "https://yahoo-finance166.p.rapidapi.com/api/market/get-day-gainers?offset=0&region=US&count=25&language=en-US&quote_type=CRYPTOCURRENCIES");  
+            return ResponseEntity.ok(response);  
+        } catch (NotActiveException e) {  
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Token expired");  
+        } catch (IOException e) {  
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error writing to file: " + e.getMessage());  
+        } catch (Exception e) {  
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());  
+        }  
+    }
+
+    @GetMapping("/crypto/losers")  
+    public ResponseEntity<String> getCryptoLosers(  
+            @RequestHeader("Authorization") String accessToken) {  
+        try {  
+            // Verificăm validitatea token-ului  
+            authService.getValidTokenByAccessToken(accessToken);  
+            
+            // Obținem datele despre Crypto  
+            String response = marketsService.fetchData("crypto_losers.json", "https://yahoo-finance166.p.rapidapi.com/api/market/get-day-losers?offset=0&language=en-US&region=US&count=25&quote_type=CRYPTOCURRENCIES");  
+            return ResponseEntity.ok(response);  
+        } catch (NotActiveException e) {  
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Token expired");  
+        } catch (IOException e) {  
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error writing to file: " + e.getMessage());  
+        } catch (Exception e) {  
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());  
+        }  
+    }
+
+
+
+
+
+
+
+    // **********
+    //  CHART
+    // **********
 
     @Operation(summary = "Get Stock Chart Data",  
             description = "Retrieves the latest chart data (hystorical data) for a specific stock symbol.",  
