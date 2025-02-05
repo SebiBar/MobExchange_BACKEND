@@ -474,48 +474,6 @@ public class MarketsController {
     }
 
 
-    @GetMapping("/crypto/trending")  
-    public ResponseEntity<String> getCryptoTrending(  
-            @RequestHeader("Authorization") String accessToken) {  
-        try {  
-            // Verificăm validitatea token-ului  
-            authService.getValidTokenByAccessToken(accessToken);  
-            
-            // Obținem datele despre Crypto  
-            String response = marketsService.fetchData("crypto_trending.json", "https://yahoo-finance166.p.rapidapi.com/api/market/get-trending?quote_type=CRYPTOCURRENCIES&offset=0&count=25&region=US&language=en-US");  
-            
-            // Parsează răspunsul JSON  
-            JSONObject jsonResponse = new JSONObject(response);  
-            JSONArray quotes = jsonResponse.getJSONObject("finance").getJSONArray("result").getJSONObject(0).getJSONArray("quotes");  
-            
-            // Trunchiază array-ul la primele 25 de elemente  
-            JSONArray truncatedQuotes = new JSONArray();  
-            for (int i = 0; i < Math.min(25, quotes.length()); i++) {  
-                truncatedQuotes.put(quotes.get(i));  
-            }  
-            
-            // Construiește noul răspuns JSON  
-            JSONObject truncatedResponse = new JSONObject();  
-            truncatedResponse.put("finance", new JSONObject()  
-                .put("result", new JSONArray()  
-                    .put(new JSONObject()  
-                        .put("count", truncatedQuotes.length())  
-                        .put("quotes", truncatedQuotes)  
-                    )  
-                )  
-            );  
-
-            return ResponseEntity.ok(truncatedResponse.toString());  
-        } catch (NotActiveException e) {  
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Token expired");  
-        } catch (IOException e) {  
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error writing to file: " + e.getMessage());  
-        } catch (Exception e) {  
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());  
-        }  
-    }
-
-
     @GetMapping("/crypto/gainers")  
     public ResponseEntity<String> getCryptoGainers(  
             @RequestHeader("Authorization") String accessToken) {  
