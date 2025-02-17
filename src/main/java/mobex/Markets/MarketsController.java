@@ -649,6 +649,92 @@ public class MarketsController {
 
 
 
+    // **************
+    //  Mutual Funds 
+    // **************
+    @Operation(summary = "Get Mutual Funds",  
+    description = "Retrieves the latest data for various Mutual Funds from the local file.",  
+    responses = {  
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved Mutual Funds data."),  
+            @ApiResponse(responseCode = "401", description = "Expired token"),  
+            @ApiResponse(responseCode = "400", description = "Invalid Token"),  
+            @ApiResponse(responseCode = "429", description = "You have exceeded the MONTHLY quota for Requests on your current plan, BASIC. Upgrade your plan for more requests."),  
+            @ApiResponse(responseCode = "500", description = "Internal server error.")  
+    }) 
+    @GetMapping("/mutual-funds/gainers")  
+    public ResponseEntity<String> getMutualFundsGainers(  
+            @RequestHeader("Authorization") String accessToken) {  
+        try {  
+            // Verificăm validitatea token-ului  
+            authService.getValidTokenByAccessToken(accessToken);  
+            
+            // Obținem datele despre Mutual Funds   
+            String response = marketsService.fetchData("mutual_funds_gainers.json", "https://yahoo-finance166.p.rapidapi.com/api/market/get-day-gainers?offset=0&region=US&count=25&language=en-US&quote_type=MUTUAL_FUNDS");  
+            return ResponseEntity.ok(response);  
+        } catch (NotActiveException e) {  
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Token expired");  
+        } catch (IOException e) {  
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error writing to file: " + e.getMessage());  
+        } catch (Exception e) {  
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());  
+        }  
+    }
+
+    @GetMapping("/mutual-funds/losers")  
+    public ResponseEntity<String> getMutualFundsLosers(  
+            @RequestHeader("Authorization") String accessToken) {  
+        try {  
+            // Verificăm validitatea token-ului  
+            authService.getValidTokenByAccessToken(accessToken);  
+            
+            // Obținem datele despre mutual funds  
+            String response = marketsService.fetchData("mutual_funds_losers.json", "https://yahoo-finance166.p.rapidapi.com/api/market/get-day-losers?offset=0&language=en-US&region=US&count=25&quote_type=MUTUAL_FUNDS");  
+            return ResponseEntity.ok(response);  
+        } catch (NotActiveException e) {  
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Token expired");  
+        } catch (IOException e) {  
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error writing to file: " + e.getMessage());  
+        } catch (Exception e) {  
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());  
+        }  
+    }
+
+    @GetMapping("/mutual-funds/top-performing")  
+    public ResponseEntity<String> getMutualFundsTopPerforming(  
+            @RequestHeader("Authorization") String accessToken) {  
+        try {  
+            // Verificăm validitatea token-ului  
+            authService.getValidTokenByAccessToken(accessToken);  
+            
+            // Obținem datele despre mutual funds   
+            String response = marketsService.fetchData("mutual_funds_top_performing.json", "https://yahoo-finance166.p.rapidapi.com/api/market/get-top-performing?count=25&region=US&language=en-US&quote_type=MUTUAL_FUNDS&offset=0");  
+            return ResponseEntity.ok(response);  
+        } catch (NotActiveException e) {  
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Token expired");  
+        } catch (IOException e) {  
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error writing to file: " + e.getMessage());  
+        } catch (Exception e) {  
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());  
+        }  
+    }
+    @GetMapping("/mutual-funds/best-historical-performance")  
+    public ResponseEntity<String> getEtfsMutualFundsBestHistoricalPerformance(  
+            @RequestHeader("Authorization") String accessToken) {  
+        try {  
+            // Verificăm validitatea token-ului  
+            authService.getValidTokenByAccessToken(accessToken);  
+            
+            // Obținem datele despre mutual funds  
+            String response = marketsService.fetchData("mutual_funds_best_historical_performance.json", "https://yahoo-finance166.p.rapidapi.com/api/market/get-best-historical-performance?region=US&count=25&offset=0&quote_type=MUTUAL_FUNDS&language=en-US");  
+            return ResponseEntity.ok(response);  
+        } catch (NotActiveException e) {  
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Token expired");  
+        } catch (IOException e) {  
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error writing to file: " + e.getMessage());  
+        } catch (Exception e) {  
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());  
+        }  
+    }
 
 
 
