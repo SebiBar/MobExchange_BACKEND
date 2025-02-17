@@ -16,8 +16,8 @@ import mobex.Token.AuthService;
 import java.io.IOException;
 import java.io.NotActiveException;
 
-import org.json.JSONArray;  
-import org.json.JSONObject;
+// import org.json.JSONArray;  
+// import org.json.JSONObject;
 
 @RestController
 @RequestMapping("/markets")
@@ -503,6 +503,139 @@ public class MarketsController {
             
             // Obținem datele despre Crypto  
             String response = marketsService.fetchData("crypto_losers.json", "https://yahoo-finance166.p.rapidapi.com/api/market/get-day-losers?offset=0&language=en-US&region=US&count=25&quote_type=CRYPTOCURRENCIES");  
+            return ResponseEntity.ok(response);  
+        } catch (NotActiveException e) {  
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Token expired");  
+        } catch (IOException e) {  
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error writing to file: " + e.getMessage());  
+        } catch (Exception e) {  
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());  
+        }  
+    }
+
+
+
+
+
+    // **********
+    //  ETFS 
+    // **********
+
+    @Operation(summary = "Get ETFS",  
+            description = "Retrieves the latest data for various ETFS from the local file.",  
+            responses = {  
+                    @ApiResponse(responseCode = "200", description = "Successfully retrieved ETFS data."),  
+                    @ApiResponse(responseCode = "401", description = "Expired token"),  
+                    @ApiResponse(responseCode = "400", description = "Invalid Token"),  
+                    @ApiResponse(responseCode = "429", description = "You have exceeded the MONTHLY quota for Requests on your current plan, BASIC. Upgrade your plan for more requests."),  
+                    @ApiResponse(responseCode = "500", description = "Internal server error.")  
+            })  
+    @GetMapping("/etfs/most-active")  
+    public ResponseEntity<String> getEtfs(  
+            @RequestHeader("Authorization") String accessToken) {  
+        try {  
+            // Verificăm validitatea token-ului  
+            authService.getValidTokenByAccessToken(accessToken);  
+            
+            // Obținem datele despre ETFS  
+            String response = marketsService.fetchData("etfs_most_active.json", "https://yahoo-finance166.p.rapidapi.com/api/market/get-most-actives?quote_type=ETFS&offset=0&count=25&region=US&language=en-US");  
+            return ResponseEntity.ok(response);  
+        } catch (NotActiveException e) {  
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Token expired");  
+        } catch (IOException e) {  
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error writing to file: " + e.getMessage());  
+        } catch (Exception e) {  
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());  
+        }  
+    }
+
+
+
+    @GetMapping("/etfs/gainers")  
+    public ResponseEntity<String> getEtfsGainers(  
+            @RequestHeader("Authorization") String accessToken) {  
+        try {  
+            // Verificăm validitatea token-ului  
+            authService.getValidTokenByAccessToken(accessToken);  
+            
+            // Obținem datele despre ETFS  
+            String response = marketsService.fetchData("etfs_gainers.json", "https://yahoo-finance166.p.rapidapi.com/api/market/get-day-gainers?offset=0&region=US&count=25&language=en-US&quote_type=ETFS");  
+            return ResponseEntity.ok(response);  
+        } catch (NotActiveException e) {  
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Token expired");  
+        } catch (IOException e) {  
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error writing to file: " + e.getMessage());  
+        } catch (Exception e) {  
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());  
+        }  
+    }
+
+    @GetMapping("/etfs/losers")  
+    public ResponseEntity<String> getEtfsLosers(  
+            @RequestHeader("Authorization") String accessToken) {  
+        try {  
+            // Verificăm validitatea token-ului  
+            authService.getValidTokenByAccessToken(accessToken);  
+            
+            // Obținem datele despre ETFS  
+            String response = marketsService.fetchData("etfs_losers.json", "https://yahoo-finance166.p.rapidapi.com/api/market/get-day-losers?offset=0&language=en-US&region=US&count=25&quote_type=ETFS");  
+            return ResponseEntity.ok(response);  
+        } catch (NotActiveException e) {  
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Token expired");  
+        } catch (IOException e) {  
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error writing to file: " + e.getMessage());  
+        } catch (Exception e) {  
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());  
+        }  
+    }
+
+    @GetMapping("/etfs/top-performing")  
+    public ResponseEntity<String> getEtfsTopPerforming(  
+            @RequestHeader("Authorization") String accessToken) {  
+        try {  
+            // Verificăm validitatea token-ului  
+            authService.getValidTokenByAccessToken(accessToken);  
+            
+            // Obținem datele despre ETFS  
+            String response = marketsService.fetchData("etfs_top_performing.json", "https://yahoo-finance166.p.rapidapi.com/api/market/get-top-performing?count=25&region=US&language=en-US&quote_type=ETFS&offset=0");  
+            return ResponseEntity.ok(response);  
+        } catch (NotActiveException e) {  
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Token expired");  
+        } catch (IOException e) {  
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error writing to file: " + e.getMessage());  
+        } catch (Exception e) {  
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());  
+        }  
+    }
+
+    @GetMapping("/etfs/trending")  
+    public ResponseEntity<String> getEtfsTrending(  
+            @RequestHeader("Authorization") String accessToken) {  
+        try {  
+            // Verificăm validitatea token-ului  
+            authService.getValidTokenByAccessToken(accessToken);  
+            
+            // Obținem datele despre ETFS  
+            String response = marketsService.fetchData("etfs_trending.json", "https://yahoo-finance166.p.rapidapi.com/api/market/get-trending?region=US&language=en-US&quote_type=ETF&count=25&offset=0");  
+            return ResponseEntity.ok(response);  
+        } catch (NotActiveException e) {  
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Token expired");  
+        } catch (IOException e) {  
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error writing to file: " + e.getMessage());  
+        } catch (Exception e) {  
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());  
+        }  
+    }
+
+    @GetMapping("/etfs/best-historical-performance")  
+    public ResponseEntity<String> getEtfsBestHistoricalPerformance(  
+            @RequestHeader("Authorization") String accessToken) {  
+        try {  
+            // Verificăm validitatea token-ului  
+            authService.getValidTokenByAccessToken(accessToken);  
+            
+            // Obținem datele despre ETFS  
+            String response = marketsService.fetchData("etfs_best_historical_performance.json", "https://yahoo-finance166.p.rapidapi.com/api/market/get-best-historical-performance?region=US&count=25&offset=0&quote_type=ETFS&language=en-US");  
             return ResponseEntity.ok(response);  
         } catch (NotActiveException e) {  
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Token expired");  
