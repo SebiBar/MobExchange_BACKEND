@@ -98,6 +98,44 @@ public class MarketsController {
         }  
     }
 
+    @GetMapping("/world-indices/europa")  
+    public ResponseEntity<String> getWorldIndicesEuropa(  
+            @RequestHeader("Authorization") String accessToken) {  
+        try {  
+            // Verificăm validitatea token-ului  
+            authService.getValidTokenByAccessToken(accessToken);  
+            
+            // Obținem datele despre indicii de pe piețele mondiale  
+            String response = marketsService.fetchData("world_indices_europa.json", "https://yahoo-finance166.p.rapidapi.com/api/market/get-quote?symbols=%5EFTSE%2C%5EFCHI%2C%5EGDAXI%2C%5EN100%2C%5ESTOXX50E%2C%5E125904-USD-STRD%2C%5EXDB%2C%5EXDE");  
+            return ResponseEntity.ok(response);  
+        } catch (NotActiveException e) {  
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Token expired");  
+        } catch (IOException e) {  
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error writing to file: " + e.getMessage());  
+        } catch (Exception e) {  
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());  
+        }  
+    }
+
+    @GetMapping("/world-indices/asia")  
+    public ResponseEntity<String> getWorldIndicesAsia(  
+            @RequestHeader("Authorization") String accessToken) {  
+        try {  
+            // Verificăm validitatea token-ului  
+            authService.getValidTokenByAccessToken(accessToken);  
+            
+            // Obținem datele despre indicii de pe piețele mondiale  
+            String response = marketsService.fetchData("world_indices_asia.json", "https://yahoo-finance166.p.rapidapi.com/api/market/get-quote?symbols=000001.SS%2C%5EN225%2C%5EHSI%2C%5EAXJO%2C%5EKS11%2C%5EBSESN%2C%5EXDN%2C%5EXDA");  
+            return ResponseEntity.ok(response);  
+        } catch (NotActiveException e) {  
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Token expired");  
+        } catch (IOException e) {  
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error writing to file: " + e.getMessage());  
+        } catch (Exception e) {  
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());  
+        }  
+    }
+
 
 
 
