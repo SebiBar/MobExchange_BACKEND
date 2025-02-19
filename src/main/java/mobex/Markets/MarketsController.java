@@ -167,6 +167,25 @@ public class MarketsController {
         }  
     }
 
+    @GetMapping("/commodities/overview")  
+    public ResponseEntity<String> getFuturesOverview(  
+            @RequestHeader("Authorization") String accessToken) {  
+        try {  
+            // Verificăm validitatea token-ului  
+            authService.getValidTokenByAccessToken(accessToken);  
+            
+            // Obținem datele despre futures overview (adica acele futures care apar in pagina de Market overview)
+            String response = marketsService.fetchData("futures_overview.json", "https://yahoo-finance166.p.rapidapi.com/api/market/get-quote?symbols=CL%3DF%2CGC%3DF%2CSI%3DF%2CHG%3DF%2CNG%3DF%2CBZ%3DF");  
+            return ResponseEntity.ok(response);  
+        } catch (NotActiveException e) {  
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Token expired");  
+        } catch (IOException e) {  
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error writing to file: " + e.getMessage());  
+        } catch (Exception e) {  
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());  
+        }  
+    }
+
 
 
 
@@ -188,6 +207,25 @@ public class MarketsController {
             
             // Obținem datele despre bonds  
             String response = marketsService.fetchData("bonds.json", "https://yahoo-finance166.p.rapidapi.com/api/market/get-quote?symbols=%5EIRX%2C%5EFVX%2C%5ETNX%2C%5ETYX%2C2YY%3DF%2CZN%3DF");  
+            return ResponseEntity.ok(response);  
+        } catch (NotActiveException e) {  
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Token expired");  
+        } catch (IOException e) {  
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error writing to file: " + e.getMessage());  
+        } catch (Exception e) {  
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());  
+        }  
+    }
+
+    @GetMapping("/bonds/overview")  
+    public ResponseEntity<String> getBondsOverview(  
+            @RequestHeader("Authorization") String accessToken) {  
+        try {  
+            // Verificăm validitatea token-ului  
+            authService.getValidTokenByAccessToken(accessToken);  
+            
+            // Obținem datele despre bonds overview
+            String response = marketsService.fetchData("bonds_overview.json", "https://yahoo-finance166.p.rapidapi.com/api/market/get-quote?symbols=%5EIRX%2C%5EFVX%2C%5ETNX%2C%5ETYX%2C2YY%3DF%2CZN%3DF");  
             return ResponseEntity.ok(response);  
         } catch (NotActiveException e) {  
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Token expired");  
@@ -220,6 +258,25 @@ public class MarketsController {
             
             // Obținem datele despre bonds  
             String response = marketsService.fetchData("currencies.json", "https://yahoo-finance166.p.rapidapi.com/api/market/get-quote?symbols=EURUSD%3DX%2CJPY%3DX%2CGBPUSD%3DX%2CAUDUSD%3DX%2CNZDUSD%3DX%2CEURJPY%3DX%2CGBPJPY%3DX%2CEURGBP%3DX%2CEURCAD%3DX%2CEURSEK%3DX%2CEURCHF%3DX%2CEURHUF%3DX%2CCNY%3DX%2CHKD%3DX%2C SGD%3DX%2CINR%3DX%2CMXN%3DX%2CPHP%3DX%2CIDR%3DX%2CTHB%3DX%2CMYR%3DX%2CZAR%3DX%2CRUB%3DX");  
+            return ResponseEntity.ok(response);  
+        } catch (NotActiveException e) {  
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Token expired");  
+        } catch (IOException e) {  
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error writing to file: " + e.getMessage());  
+        } catch (Exception e) {  
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());  
+        }  
+    }
+
+    @GetMapping("/currencies/overview")  
+    public ResponseEntity<String> getCurrenciesOverview(  
+            @RequestHeader("Authorization") String accessToken) {  
+        try {  
+            // Verificăm validitatea token-ului  
+            authService.getValidTokenByAccessToken(accessToken);  
+            
+            // Obținem datele despre currencies overview 
+            String response = marketsService.fetchData("currencies_overview.json", "https://yahoo-finance166.p.rapidapi.com/api/market/get-quote?symbols=EURUSD%3DX%2CJPY%3DX%2CGBP%3DX%2CAUD%3DX%2CCAD%3DX%2CMXN%3DX");  
             return ResponseEntity.ok(response);  
         } catch (NotActiveException e) {  
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Token expired");  
