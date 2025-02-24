@@ -15,6 +15,8 @@ import mobex.Token.AuthService;
 
 import java.io.IOException;
 import java.io.NotActiveException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 // import org.json.JSONArray;  
 // import org.json.JSONObject;
@@ -57,6 +59,44 @@ public class MarketsController {
             // Facem request către API-ul Yahoo Finance  
             String response = marketsService.fetchDataFor1Asset(url);  
             
+            return ResponseEntity.ok(response);  
+        } catch (NotActiveException e) {  
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Token expired");  
+        } catch (IOException e) {  
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error fetching data: " + e.getMessage());  
+        } catch (Exception e) {  
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());  
+        }  
+    }
+
+
+    // *************
+    // AUTOCOMPLETE
+    // *************
+    @Operation(summary = "Autocomplete that searches for Symbols, News and Research",  
+            description = "Retrieves autocomplete suggestions for Symbols, News and Research from Yahoo Finance.",  
+            responses = {  
+                    @ApiResponse(responseCode = "200", description = "Successfully retrieved data."),  
+                    @ApiResponse(responseCode = "401", description = "Expired token"),  
+                    @ApiResponse(responseCode = "400", description = "Invalid Token"),  
+                    @ApiResponse(responseCode = "429", description = "You have exceeded the MONTHLY quota for Requests."),  
+                    @ApiResponse(responseCode = "500", description = "Internal server error.")  
+            })  
+    @GetMapping("/autocomplete")  
+    public ResponseEntity<String> autocomplete(  
+            @RequestHeader("Authorization") String accessToken,  
+            @RequestParam("query") String query) {  
+        try {  
+            // Verificăm validitatea token-ului  
+            authService.getValidTokenByAccessToken(accessToken);  
+
+            // Construim URL-ul pentru API-ul Yahoo Finance  
+            String url = String.format("https://yahoo-finance166.p.rapidapi.com/api/autocomplete?query=%s",   
+                    URLEncoder.encode(query, StandardCharsets.UTF_8));  
+
+            // Facem request către API-ul Yahoo Finance  
+            String response = marketsService.fetchAutocompleteData(url);  
+
             return ResponseEntity.ok(response);  
         } catch (NotActiveException e) {  
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Token expired");  
