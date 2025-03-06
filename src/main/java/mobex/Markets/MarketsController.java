@@ -108,6 +108,39 @@ public class MarketsController {
     }
 
 
+    // ********************
+    // GET NEWS FOR SYMBOLS
+    // ********************
+
+    @Operation(summary = "Get News for Symbols",  
+            description = "Retrieves news for symbols that have came from the client",  
+            responses = {  
+                    @ApiResponse(responseCode = "200", description = "Successfully retrieved news for symbols."),  
+                    @ApiResponse(responseCode = "401", description = "Expired token"),  
+                    @ApiResponse(responseCode = "400", description = "Invalid Token"),  
+                    @ApiResponse(responseCode = "429", description = "You have exceeded the MONTHLY quota for Requests on your current plan, BASIC. Upgrade your plan for more requests."),  
+                    @ApiResponse(responseCode = "500", description = "Internal server error.")  
+            })  
+    @GetMapping("/getNewsForSymbols")  
+    public ResponseEntity<String> getNewsForSymbols(  
+            @RequestHeader("Authorization") String accessToken,  
+            @RequestParam String symbols) {  
+        try {  
+            // Verificăm validitatea token-ului  
+            authService.getValidTokenByAccessToken(accessToken);  
+            
+            String response = marketsService.fetchNewsForSymbols(symbols);  
+            return ResponseEntity.ok(response);  
+        } catch (NotActiveException e) {  
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Token expired");  
+        } catch (IOException e) {  
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error fetching news for symbols: " + e.getMessage());  
+        } catch (Exception e) {  
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());  
+        }  
+    }
+
+
     
 
     @Operation(summary = "Get World Indices",  

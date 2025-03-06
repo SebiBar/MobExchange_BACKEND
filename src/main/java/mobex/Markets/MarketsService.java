@@ -191,4 +191,24 @@ public class MarketsService {
     public String fetchStockChartData(String symbol, String range, String interval) throws IOException {
         return readOrCreateFile(symbol, range, interval);
     }
+
+
+
+    // This method gets news for symbols from api.
+    
+    public String fetchNewsForSymbols(String symbols) throws IOException {  
+        HttpHeaders headers = new HttpHeaders();  
+        headers.set("x-rapidapi-key", apiKey);   
+        headers.set("x-rapidapi-host", "yahoo-finance166.p.rapidapi.com");  
+
+        HttpEntity<String> entity = new HttpEntity<>(headers);  
+
+        String url = "https://yahoo-finance166.p.rapidapi.com/api/news/list-by-symbol?s=" + symbols + "&region=US&snippetCount=12";
+
+        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);  
+
+        return responseEntity.getBody();  
+    } 
+
+
 }
