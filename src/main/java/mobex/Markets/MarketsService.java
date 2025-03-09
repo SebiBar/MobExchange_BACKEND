@@ -203,7 +203,7 @@ public class MarketsService {
 
         HttpEntity<String> entity = new HttpEntity<>(headers);  
 
-        String url = "https://yahoo-finance166.p.rapidapi.com/api/news/list-by-symbol?s=" + symbols + "&region=US&snippetCount=12";
+        String url = "https://yahoo-finance166.p.rapidapi.com/api/news/list-by-symbol?s=" + symbols + "&region=US&snippetCount=20";
 
         ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);  
 
