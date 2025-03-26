@@ -27,7 +27,10 @@ public class MarketsService {
     private String apiKey; // API key din application.properties
 
     private static final String STOCKS_DIRECTORY = "historical_data_for_assets";
-    private static final long ONE_MONTH = 2592000000L; // 1 lună în milisecunde
+    //private static final long ONE_MONTH = 2592000000L; // 1 lună în milisecunde
+    private static final long ONE_DAY = 86400000L; // 1 zi în milisecunde  
+    private static final long UPDATE_INTERVAL = 10000; // 10 secunde in milisecunde
+
    
 
     @Autowired
@@ -85,7 +88,7 @@ public class MarketsService {
     private boolean isFileUpToDate(String fileName) {  
         Path path = Paths.get(fileName);  
         try {  
-            return Files.exists(path) && Files.getLastModifiedTime(path).toMillis() > System.currentTimeMillis() - ONE_MONTH; // 1 luna  
+            return Files.exists(path) && Files.getLastModifiedTime(path).toMillis() > System.currentTimeMillis() - ONE_DAY; // la o durata de o zi se actualizeaza datele. 
         } catch (IOException e) {  
             // În cazul în care apare o eroare la citirea fișierului, considerăm că fișierul nu este actualizat  
             return false;  
