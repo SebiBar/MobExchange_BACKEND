@@ -117,7 +117,7 @@ public class MarketsService {
             directory.mkdir();
         }
 
-        // String[] subdirectories = {"1D", "5D", "1M", "3M", "6M", "1Y", "5Y", "ALL"};
+        // Creează subdirectoare pentru fiecare interval de timp
         String[] subdirectories = {"1D", "5D", "1M", "6M", "YTD", "1Y", "5Y", "ALL"};
         for (String subdirectory : subdirectories) {
             File subdirectoryFile = new File(STOCKS_DIRECTORY + "/" + subdirectory);
@@ -127,24 +127,29 @@ public class MarketsService {
         }
     }
 
-    private String readOrCreateFile(String symbol, String range, String interval) {
-        String subdirectory = getSubdirectory(range);
-        String filename = symbol + "_" + subdirectory + ".json";
-        String filepath = STOCKS_DIRECTORY + "/" + subdirectory + "/" + filename;
+    private String readOrCreateFile(String symbol, String range, String interval) {  
+        // Determină subdirectorul în funcție de intervalul de timp (range)  
+        String subdirectory = getSubdirectory(range);  
 
-        File file = new File(filepath);
-        if (file.exists() && file.isFile()) {
-            try {
-                return new String(Files.readAllBytes(Paths.get(filepath)));
-            } catch (IOException e) {
-                // Dacă fișierul este corupt, facem un request la API
-                return fetchStockChartDataFromAPI(symbol, range, interval);
-            }
-        } else {
-            // Dacă fișierul nu există, facem un request la API
-            return fetchStockChartDataFromAPI(symbol, range, interval);
-        }
-    }
+        // Construiește numele fișierului în format simbol_subdirector.json  
+        String filename = symbol + "_" + subdirectory + ".json";  
+
+        // Construiește calea completă către fișier în directorul specificat  
+        String filepath = STOCKS_DIRECTORY + "/" + subdirectory + "/" + filename;   
+        
+        // Verifică dacă fișierul este actualizat în ultimele 24h  
+        if (isFileUpToDate(filepath)) {  
+            try { 
+                // Dacă fișierul este actualizat, citește și returnează conținutul său  
+                return new String(Files.readAllBytes(Paths.get(filepath)));  
+            } catch (IOException e) {  
+                // Dacă citirea eșuează, continuă să preia date de la API  
+            }  
+        }  
+
+        // Dacă fișierul nu există sau nu este actualizat în ultimele 24h, preia datele noi și scrie în fișier  
+        return fetchStockChartDataFromAPI(symbol, range, interval);  
+    }   
 
     private String fetchStockChartDataFromAPI(String symbol, String range, String interval) {
         // Codul pentru a face un request la API și a scrie datele în fișier
