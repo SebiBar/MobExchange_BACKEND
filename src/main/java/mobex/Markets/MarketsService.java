@@ -66,12 +66,14 @@ public class MarketsService {
 
     
     public String fetchData(String fileName, String url) throws IOException {  
-        // Verifică dacă fișierul este actualizat  
+        // Verifică dacă fișierul exista si daca este actualizat  
         if (isFileUpToDate(fileName)) {  
-            // Citește și returnează conținutul fișierului  
+            // Daca continutul este actualizat, citește și returnează conținutul fișierului  
             return new String(Files.readAllBytes(Paths.get(fileName)));  
         }  
     
+        // Dacă fișierul nu există sau nu este actualizat, faceți un request la API
+        // și scrieți răspunsul în fișier
         HttpHeaders headers = new HttpHeaders();  
         headers.set("x-rapidapi-key", apiKey);   
         headers.set("x-rapidapi-host", "yahoo-finance166.p.rapidapi.com");  
@@ -85,6 +87,7 @@ public class MarketsService {
         return response.getBody();  
     }  
     
+    // Metoda pentru a verifica dacă fișierul exista si daca a fost actualizat în ultimele 24 de ore
     private boolean isFileUpToDate(String fileName) {  
         Path path = Paths.get(fileName);  
         try {  
