@@ -79,3 +79,8 @@ public class ExchangeRateServiceTest {
         assertEquals(0.0, convertedAmount);
     }
 }
+
+
+
+
+

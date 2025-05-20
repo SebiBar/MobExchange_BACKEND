@@ -29,7 +29,7 @@ public class MarketsService {
     private static final String STOCKS_DIRECTORY = "historical_data_for_assets";
     //private static final long ONE_MONTH = 2592000000L; // 1 lună în milisecunde
     private static final long ONE_DAY = 86400000L; // 1 zi în milisecunde  
-    private static final long UPDATE_INTERVAL = 10000; // 10 secunde in milisecunde
+    //private static final long UPDATE_INTERVAL = 10000; // 10 secunde in milisecunde
 
    
 
