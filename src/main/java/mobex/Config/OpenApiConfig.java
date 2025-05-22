@@ -7,9 +7,9 @@ import io.swagger.v3.oas.annotations.servers.Server;
 
 @OpenAPIDefinition(
             info = @Info(
-                    title = "MobExchange API",
+                    title = "MobiExchange API",
                     version = "1.0",
-                    description = "API for getting exchange rates and managing user authentication.",
+                    description = "API for obtaining exchange rates, managing user authentication, and accessing financial asset data.",
                     license = @License(
                             name = "Apache 2.0",
                             url = "http://www.apache.org/licenses/LICENSE-2.0.html"
