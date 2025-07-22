@@ -29,6 +29,9 @@ public class MarketsService {
     private static final String STOCKS_DIRECTORY = "historical_data_for_assets";
     //private static final long ONE_MONTH = 2592000000L; // 1 lună în milisecunde
     private static final long ONE_DAY = 86400000L; // 1 zi în milisecunde  
+    //private static final long ONE_MINUTE = 55000; // 55 secunde in milisecunde 
+    // private static final long ONE_WEEK = 604800000; // Milisecunde într-o săptămână
+    private static final long ONE_MONTH = 2592000000L; // Milisecunde într-o lună de 30 de zile
     //private static final long UPDATE_INTERVAL = 10000; // 10 secunde in milisecunde
 
    
@@ -91,7 +94,7 @@ public class MarketsService {
     private boolean isFileUpToDate(String fileName) {  
         Path path = Paths.get(fileName);  
         try {  
-            return Files.exists(path) && Files.getLastModifiedTime(path).toMillis() > System.currentTimeMillis() - ONE_DAY; // la o durata de o zi se actualizeaza datele. 
+            return Files.exists(path) && Files.getLastModifiedTime(path).toMillis() > System.currentTimeMillis() - ONE_MONTH; // la o durata de 1 luna se actualizeaza datele. 
         } catch (IOException e) {  
             // În cazul în care apare o eroare la citirea fișierului, considerăm că fișierul nu este actualizat  
             return false;  
